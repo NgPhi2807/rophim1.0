@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+/* Ẩn scrollbar trên tất cả trình duyệt phổ biến */
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE và Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari và Opera */
+}
+.font-roboto {
+  font-family: "Roboto", Arial, sans-serif;
+}
+.fade-in-section {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.6s ease-out;
+}
+
+.fade-in-section.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+ .clip-path-rank {
+      clip-path: polygon(0 0, 100% 0, 75% 100%, 0% 100%);
+    }
+.no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+}
+  .no-scrollbar::-webkit-scrollbar {
+      display: none;
+}
+@layer components {
+  .movie-card-item {
+    @apply relative block h-full flex-shrink-0 snap-start;
+  }
+
+  .movie-card-width {
+    @apply w-movie-col-3 sm:w-movie-col-4-sm md:w-movie-col-5-md lg:w-movie-col-5-md xl:w-movie-col-6-lg;
+  }
+  .movie-hero-width {
+    @apply w-movie-col-1 ;
+  }
+}
+
+@layer components {
+  .movie-card {
+    @apply relative block h-full flex-shrink-0 snap-start
+           w-movie-card-col-2 
+           sm:w-movie-card-col-2 
+           md:w-movie-card-col-3-lg 
+           lg:w-movie-card-col-3-lg 
+           xl:w-movie-card-col-5-xl;
+  }
+   .movie-card-row1 {
+    @apply relative block h-full flex-shrink-0 snap-start
+           w-movie-card-col-2 
+           sm:w-movie-card-col-2 
+           md:w-movie-card-col-3-lg 
+           lg:w-movie-card-col-3-lg 
+           xl:w-movie-card-col-4-xl;
+  }
+}
+
+/* Custom scrollbar for Webkit browsers (Chrome, Safari, Edge) */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px; /* Chiều rộng thanh cuộn dọc */
+  height: 8px; /* Chiều cao thanh cuộn ngang (không dùng trong trường hợp này) */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #2a2c33; /* Màu nền của phần track (rãnh cuộn) */
+  border-radius: 10px; /* Bo tròn track */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #4a4d55; /* Màu của thumb (phần kéo) */
+  border-radius: 10px; /* Bo tròn thumb */
+  border: 2px solid #2a2c33; /* Tạo khoảng cách nhỏ giữa thumb và track */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #6a6d75; /* Màu thumb khi di chuột qua */
+}
+
+/* Custom scrollbar for Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin; /* Đặt chiều rộng thanh cuộn: "auto" hoặc "thin" */
+  scrollbar-color: #4a4d55 #2a2c33; /* Màu thumb và màu track */
+}

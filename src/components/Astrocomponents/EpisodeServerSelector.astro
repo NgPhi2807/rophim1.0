@@ -1,0 +1,107 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import bgImage from "../../assets/tips-box.png"; // Assuming the path to your image is correct
+
+interface Props extends HTMLAttributes<"div"> {
+  slug: string;
+  so_tap: string;
+  ngon_ngu: string;
+  server: string;
+  hasSv1Video: boolean;
+  hasSv2Video: boolean;
+  hasSv3Video: boolean;
+}
+
+const {
+  slug,
+  so_tap,
+  ngon_ngu,
+  server,
+  hasSv1Video,
+  hasSv2Video,
+  hasSv3Video,
+  ...rest
+} = Astro.props;
+
+const formatEpisodeNumber = (numStr: string) => {
+  const num = parseInt(numStr, 10);
+  return isNaN(num) ? numStr : num < 10 ? `0${num}` : numStr;
+};
+
+const formattedSoTap = !isNaN(parseInt(so_tap))
+  ? formatEpisodeNumber(so_tap)
+  : so_tap;
+
+const episodeSegment = !isNaN(parseInt(so_tap))
+  ? `tap-${formattedSoTap}`
+  : so_tap;
+---
+
+<div class="relative z-10 rounded-[6px] overflow-hidden shadow-md py-4">
+  <div
+    class="absolute inset-0 -z-10 bg-cover bg-center"
+    style={`background-image: url('${bgImage.src}');`}
+  >
+  </div>
+
+  <div
+    class="bg-gray/50 text-white text-center text-xs font-semibold px-5 space-y-3"
+  >
+    <div class="flex items-center justify-center gap-4 flex-col">
+      <div class="flex flex-row gap-2">
+        {
+          hasSv1Video && (
+            <a
+              href={`/xem-phim/${slug}/${episodeSegment}/${ngon_ngu}?server=sv1`}
+              class:list={[
+                "px-3 py-1 rounded-[4px] text-xs font-semibold transition-all duration-200",
+                server === "sv1"
+                  ? "bg-[#ffd785] text-black shadow-md"
+                  : "bg-[#303033] hover:bg-[#404040] text-gray-300",
+              ]}
+              aria-disabled={!hasSv1Video ? "true" : "false"}
+            >
+              Server 1
+            </a>
+          )
+        }
+
+        {
+          hasSv2Video && (
+            <a
+              href={`/xem-phim/${slug}/${episodeSegment}/${ngon_ngu}?server=sv2`}
+              class:list={[
+                "px-3 py-1 rounded-[4px] text-xs font-semibold transition-all duration-200",
+                server === "sv2"
+                  ? "bg-[#ffd785] text-black shadow-md"
+                  : "bg-[#434347] hover:bg-[#404040] text-gray-300",
+              ]}
+            >
+              Server 2
+            </a>
+          )
+        }
+
+        {
+          hasSv3Video && (
+            <a
+              href={`/xem-phim/${slug}/${episodeSegment}/${ngon_ngu}?server=sv3`}
+              class:list={[
+                "px-3 py-1 rounded-[4px] text-xs font-semibold transition-all duration-200",
+                server === "sv3"
+                  ? "bg-[#505054] text-black shadow-md"
+                  : "bg-[#434347] hover:bg-[#404040] text-gray-300",
+              ]}
+            >
+              Server 3
+            </a>
+          )
+        }
+      </div>
+      <p class="text-xs lg:text-base">
+        🌟 Nếu bạn không xem được video, hãy thử tắt trình chặn quảng , đổi
+        server hoặc tải lại trang
+      </p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,41 @@
+{
+  "name": "astro-svelte-tailwind",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@astrojs/node": "^9.3.0",
+    "@astrojs/react": "^4.3.0",
+    "@astrojs/vercel": "^8.2.3",
+    "@vercel/analytics": "^1.5.0",
+    "artplayer": "^5.2.3",
+    "astro": "^5.11.1",
+    "astro-compress": "^2.3.8",
+    "axios": "^1.10.0",
+    "bottleneck": "^2.19.5",
+    "dotenv": "^17.2.0",
+    "firebase": "^12.0.0",
+    "framer-motion": "^12.23.6",
+    "gsap": "^3.13.0",
+    "hls.js": "^1.6.7",
+    "js-md5": "^0.8.3",
+    "keen-slider": "^6.8.6",
+    "plyr": "^3.7.8",
+    "react": "^19.1.0",
+    "react-responsive": "^10.0.1",
+    "react-slick": "^0.30.3",
+    "slick-carousel": "^1.8.1",
+    "typescript": "^5.8.3"
+  },
+  "devDependencies": {
+    "@astrojs/tailwind": "^6.0.2",
+    "rollup": "^3.29.5"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-win32-x64-msvc": "^4.45.1"
+  }
+}

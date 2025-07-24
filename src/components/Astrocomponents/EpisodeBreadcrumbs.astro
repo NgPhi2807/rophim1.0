@@ -1,0 +1,70 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+interface Props extends HTMLAttributes<"nav"> {
+  slug: string;
+  so_tap: string;
+  tenPhimFormatted: string;
+}
+
+const { slug, so_tap, tenPhimFormatted, ...rest } = Astro.props;
+const soTapFormatted = so_tap
+  ? so_tap.charAt(0).toUpperCase() + so_tap.slice(1)
+  : "";
+---
+
+<nav class="w-fit max-w-full px-2 py-2 mt-4 sm:mt-20 lg:mt-4" {...rest}>
+  <ol class="flex items-center space-x-2 text-[13px] text-gray-300">
+    <li class="flex items-center gap-2">
+      <a
+        href="/"
+        class="text-white hover:text-[#ffd785] font-semibold text-sm lg:text-base"
+      >
+        <div class="flex items-center gap-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            ><path
+              fill="currentColor"
+              fill-rule="evenodd"
+              d="M2.52 7.823C2 8.77 2 9.915 2 12.203v1.522c0 3.9 0 5.851 1.172 7.063S6.229 22 10 22h4c3.771 0 5.657 0 6.828-1.212S22 17.626 22 13.725v-1.521c0-2.289 0-3.433-.52-4.381c-.518-.949-1.467-1.537-3.364-2.715l-2-1.241C14.111 2.622 13.108 2 12 2s-2.11.622-4.116 1.867l-2 1.241C3.987 6.286 3.038 6.874 2.519 7.823m6.927 7.575a.75.75 0 1 0-.894 1.204A5.77 5.77 0 0 0 12 17.75a5.77 5.77 0 0 0 3.447-1.148a.75.75 0 1 0-.894-1.204A4.27 4.27 0 0 1 12 16.25a4.27 4.27 0 0 1-2.553-.852"
+              clip-rule="evenodd"></path></svg
+          >
+          <span>Trang chủ</span>
+        </div>
+      </a>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="w-6 h-6"
+        viewBox="0 0 24 24"
+      >
+        <path
+          fill="currentColor"
+          d="M10.02 6L8.61 7.41L13.19 12l-4.58 4.59L10.02 18l6-6z"></path>
+      </svg>
+    </li>
+
+    <li class="flex items-center gap-2">
+      <h1
+        class="text-white hover:text-[#ffd785] truncate max-w-[150px] lg:max-w-[500px] text-sm lg:text-base font-semibold"
+      >
+        <a href={`/phim/${slug}`}>{tenPhimFormatted}</a>
+      </h1>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="w-6 h-6"
+        viewBox="0 0 24 24"
+      >
+        <path
+          fill="currentColor"
+          d="M10.02 6L8.61 7.41L13.19 12l-4.58 4.59L10.02 18l6-6z"></path>
+      </svg>
+    </li>
+
+    <li class="font-semibold text-gray text-sm lg:text-base">
+      Tập {soTapFormatted}
+    </li>
+  </ol>
+</nav>

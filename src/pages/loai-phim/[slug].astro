@@ -1,0 +1,120 @@
+---
+export const prerender = true;
+
+export async function getStaticPaths() {
+  return [
+    { params: { slug: "phim-le" } },
+    { params: { slug: "phim-bo" } },
+    { params: { slug: "hoat-hinh" } },
+    { params: { slug: "phim-chieu-rap" } },
+  ];
+}
+
+import BaseLayout from "../../layouts/Layout.astro";
+import Header from "../../components/Header";
+import CategoryMovies from "../../components/MovieType/MovieType";
+import TopMovies from "../../components/TodayMovies";
+
+const slug = Astro.params.slug;
+const initialPage = 1;
+const limit = 60;
+const BASE_URL = "https://phimapi.com";
+const API_URL = `${BASE_URL}/v1/api/danh-sach/${slug}?page=${initialPage}&limit=${limit}&sort_field=_id&sort_type=dsc`;
+const TOP_URL = `${BASE_URL}/v1/api/danh-sach/phim-bo?page=1&sort_field=_id&sort_type=dsc&limit=10`;
+
+const fetchJson = async (url: string) => {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Lỗi khi fetch API: ${url}`);
+    return await res.json();
+  } catch (err) {
+    return null;
+  }
+};
+
+const categoryResponse = await fetchJson(API_URL);
+const topResponse = await fetchJson(TOP_URL);
+const categoryData = categoryResponse?.data;
+const topmovies = topResponse?.data.items || [];
+
+const currentCategoryName = categoryData.titlePage || slug;
+const siteUrl = "https://motchillw.live";
+const currentUrl = `${siteUrl}/loai-phim/${slug}`;
+const titleTag = `${currentCategoryName} Mới Nhất - Xem ${currentCategoryName} Online Vietsub | Motchill`;
+const seoDescription = `Xem ${currentCategoryName.toLowerCase()} online chất lượng cao, Vietsub miễn phí tại Motchill. Nội dung hấp dẫn, cập nhật liên tục không quảng cáo.`;
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Trang chủ",
+      item: siteUrl,
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: currentCategoryName,
+      item: currentUrl,
+    },
+  ],
+};
+---
+
+<BaseLayout>
+  <Fragment slot="head">
+    <title>{titleTag}</title>
+    <meta name="description" content={seoDescription} />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href={currentUrl} />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content={titleTag} />
+    <meta property="og:description" content={seoDescription} />
+    <meta property="og:url" content={currentUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="vi_VN" />
+    <meta property="og:site_name" content="Motchill" />
+    <meta property="og:image" content={`${siteUrl}/logo.png`} />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={titleTag} />
+    <meta name="twitter:description" content={seoDescription} />
+    <meta name="twitter:image" content={`${siteUrl}/logo.png`} />
+
+    <!-- Favicon -->
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+
+    <!-- JSON-LD Breadcrumb -->
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(breadcrumbSchema)}
+    />
+  </Fragment>
+
+  <div class="bg-[#191B24]">
+    <Header client:load />
+    <main
+      id="main-content"
+      class="container mx-auto lg:px-8 lg:flex lg:gap-10 p-4 lg:py-20"
+    >
+      <div class="w-full lg:flex-[7] flex flex-col gap-6">
+        <CategoryMovies
+          initialData={categoryData}
+          initialSlug={slug}
+          baseUrl={BASE_URL}
+          initialLimit={limit}
+          tittle={currentCategoryName}
+          client:load
+        />
+      </div>
+
+      <div class="w-full lg:flex-[3] lg:mt-0 mt-4">
+        <TopMovies movies={topmovies} />
+      </div>
+    </main>
+  </div>
+</BaseLayout>

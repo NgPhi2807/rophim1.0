@@ -1,0 +1,144 @@
+---
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const staticTheLoaiList = [
+    { id: 1, ten: "Hành Động", slug: "hanh-dong" },
+    { id: 2, ten: "Cổ Trang", slug: "co-trang" },
+    { id: 3, ten: "Viễn Tưởng", slug: "vien-tuong" },
+    { id: 4, ten: "Bí Ẩn", slug: "bi-an" },
+    { id: 5, ten: "Tâm Lý", slug: "tam-ly" },
+    { id: 6, ten: "Âm Nhạc", slug: "am-nhac" },
+    { id: 7, ten: "Phiêu Lưu", slug: "phieu-luu" },
+    { id: 8, ten: "Chính Kịch", slug: "chinh-kich" },
+    { id: 9, ten: "Khoa Học", slug: "khoa-hoc" },
+    { id: 10, ten: "Học Đường", slug: "hoc-duong" },
+    { id: 11, ten: "Võ Thuật", slug: "vo-thuat" },
+    { id: 12, ten: "Chiến Tranh", slug: "chien-tranh" },
+    { id: 18, ten: "Hình Sự", slug: "hinh-su" },
+    { id: 19, ten: "Gia Đình", slug: "gia-dinh" },
+    { id: 20, ten: "Tình Cảm", slug: "tinh-cam" },
+    { id: 21, ten: "Thần Thoại", slug: "than-thoai" },
+    { id: 22, ten: "Thể Thao", slug: "the-thao" },
+    { id: 23, ten: "Kinh Dị", slug: "kinh-di" },
+    { id: 24, ten: "Kinh Điển", slug: "kinh-dien" },
+  ];
+
+  return staticTheLoaiList.map((theLoai) => ({
+    params: { slug: theLoai.slug },
+  }));
+}
+
+import BaseLayout from "../../layouts/Layout.astro";
+import Header from "../../components/Header";
+import CategoryMovies from "../../components/MovieType/MovieCategory";
+import TopMovies from "../../components/TodayMovies";
+
+const slug = Astro.params.slug;
+const initialPage = 1;
+const limit = 60;
+const BASE_URL = "https://phimapi.com";
+const API_URL = `${BASE_URL}/v1/api/the-loai/${slug}?page=${initialPage}&limit=${limit}&sort_field=_id&sort_type=dsc`;
+const TOP_URL = `${BASE_URL}/v1/api/danh-sach/phim-bo?page=1&sort_field=_id&sort_type=dsc&limit=10`;
+
+const fetchJson = async (url: string) => {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Lỗi khi fetch API: ${url}`);
+    return await res.json();
+  } catch (err) {
+    return null;
+  }
+};
+
+const categoryResponse = await fetchJson(API_URL);
+const topResponse = await fetchJson(TOP_URL);
+const categoryData = categoryResponse?.data;
+const topmovies = topResponse?.data.items || [];
+
+if (!categoryData || !topmovies) {
+  return new Response("Không thể lấy dữ liệu. Vui lòng thử lại sau.", {
+    status: 500,
+  });
+}
+
+const currentCategoryName = categoryData.titlePage || slug;
+const siteUrl = "https://motchillw.live";
+const currentUrl = `${siteUrl}/the-loai/${slug}`;
+const titleTag = `${currentCategoryName} Mới Nhất - Xem Phim ${currentCategoryName} Online Vietsub | Motchill`;
+const seoDescription = `Xem ${currentCategoryName.toLowerCase()} online chất lượng cao, Vietsub miễn phí tại Motchill. Nội dung hấp dẫn, cập nhật liên tục không quảng cáo.`;
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Trang chủ",
+      item: siteUrl,
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: currentCategoryName,
+      item: currentUrl,
+    },
+  ],
+};
+---
+
+<BaseLayout>
+  <Fragment slot="head">
+    <title>{titleTag}</title>
+    <meta name="description" content={seoDescription} />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href={currentUrl} />
+
+    <meta property="og:title" content={titleTag} />
+    <meta property="og:description" content={seoDescription} />
+    <meta property="og:url" content={currentUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="vi_VN" />
+    <meta property="og:site_name" content="Motchill" />
+    <meta property="og:image" content={`${siteUrl}/logo.png`} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={titleTag} />
+    <meta name="twitter:description" content={seoDescription} />
+    <meta name="twitter:image" content={`${siteUrl}/logo.png`} />
+
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(breadcrumbSchema)}
+    />
+  </Fragment>
+
+  <div class="bg-[#191B24]">
+    <Header client:load />
+
+    <main
+      id="main-content"
+      class="container mx-auto p-4 lg:px-8 lg:flex lg:gap-10 lg:py-20"
+    >
+      <div class="w-full lg:flex-[7] flex flex-col gap-6">
+        <div class="px-0 lg:px-0">
+          <CategoryMovies
+            initialData={categoryData}
+            initialSlug={slug}
+            baseUrl={BASE_URL}
+            initialLimit={limit}
+            tittle={currentCategoryName}
+            client:load
+          />
+        </div>
+      </div>
+
+      <div class="w-full lg:flex-[3] px-0 lg:px-0">
+        <TopMovies movies={topmovies} />
+      </div>
+    </main>
+  </div>
+</BaseLayout>

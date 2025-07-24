@@ -1,0 +1,237 @@
+---
+export const prerender = true;
+
+import BaseLayout from "../../layouts/Layout.astro";
+import Header from "../../components/Header";
+import CategoryMovies from "../../components/MovieType/MovieCountry";
+import TopMovies from "../../components/TodayMovies";
+
+export async function getStaticPaths() {
+  const staticCountrySlugs = [
+    "viet-nam",
+    "han-quoc",
+    "au-my",
+    "trung-quoc",
+    "nhat-ban",
+    "thai-lan",
+    "an-do",
+    "phap",
+    "anh",
+    "nga",
+    "duc",
+    "y",
+    "tay-ban-nha",
+    "uc",
+    "canada",
+    "philippines",
+    "indonesia",
+    "malaysia",
+    "hong-kong",
+    "mexico",
+    "dan-mach",
+    "thuy-dien",
+    "thuy-si",
+    "ukraina",
+    "ba-lan",
+    "bo-dao-nha",
+    "u-a-e",
+    "dai-loan",
+    "a-rap-xe-ut",
+    "tho-nhi-ky",
+    "brazil",
+    "nam-phi",
+    "na-uy",
+    "chau-phi",
+    "quoc-gia-khac",
+  ];
+
+  return staticCountrySlugs.map((slug) => ({ params: { slug } }));
+}
+
+const slug = Astro.params.slug;
+const initialPage = 1;
+const limit = 60;
+const BASE_URL = "https://phimapi.com";
+const API_URL = `${BASE_URL}/v1/api/quoc-gia/${slug}?page=${initialPage}&limit=${limit}&sort_field=_id&sort_type=desc`;
+const TOP_URL = `${BASE_URL}/v1/api/danh-sach/phim-bo?page=1&sort_field=_id&sort_type=desc&limit=10`;
+
+const fetchJson = async (url: string) => {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Lỗi khi fetch API: ${url}`);
+    return await res.json();
+  } catch (err) {
+    console.error(`Error fetching ${url}:`, err);
+    return null;
+  }
+};
+
+const categoryResponse = await fetchJson(API_URL);
+const topResponse = await fetchJson(TOP_URL);
+
+const categoryData = categoryResponse?.data;
+const topmovies = topResponse?.data?.items || [];
+
+if (!categoryData || !topmovies) {
+  return new Response("Không thể lấy dữ liệu. Vui lòng thử lại sau.", {
+    status: 500,
+  });
+}
+
+const slugToName = (s: string) => {
+  switch (s) {
+    case "viet-nam":
+      return "Phim Việt Nam";
+    case "han-quoc":
+      return "Phim Hàn Quốc";
+    case "au-my":
+      return "Phim Âu Mỹ";
+    case "trung-quoc":
+      return "Phim Trung Quốc";
+    case "nhat-ban":
+      return "Phim Nhật Bản";
+    case "thai-lan":
+      return "Phim Thái Lan";
+    case "an-do":
+      return "Phim Ấn Độ";
+    case "phap":
+      return "Phim Pháp";
+    case "anh":
+      return "Phim Anh";
+    case "nga":
+      return "Phim Nga";
+    case "duc":
+      return "Phim Đức";
+    case "y":
+      return "Phim Ý";
+    case "tay-ban-nha":
+      return "Phim Tây Ban Nha";
+    case "uc":
+      return "Phim Úc";
+    case "canada":
+      return "Phim Canada";
+    case "philippines":
+      return "Phim Philippines";
+    case "indonesia":
+      return "Phim Indonesia";
+    case "malaysia":
+      return "Phim Malaysia";
+    case "hong-kong":
+      return "Phim Hong Kong";
+    case "mexico":
+      return "Phim Mexico";
+    case "dan-mach":
+      return "Phim Đan Mạch";
+    case "thuy-dien":
+      return "Phim Thụy Điển";
+    case "thuy-si":
+      return "Phim Thụy Sĩ";
+    case "ukraina":
+      return "Phim Ukraina";
+    case "ba-lan":
+      return "Phim Ba Lan";
+    case "bo-dao-nha":
+      return "Phim Bồ Đào Nha";
+    case "u-a-e":
+      return "Phim UAE";
+    case "dai-loan":
+      return "Phim Đài Loan";
+    case "a-rap-xe-ut":
+      return "Phim Ả Rập Xê Út";
+    case "tho-nhi-ky":
+      return "Phim Thổ Nhĩ Kỳ";
+    case "brazil":
+      return "Phim Brazil";
+    case "nam-phi":
+      return "Phim Nam Phi";
+    case "na-uy":
+      return "Phim Na Uy";
+    case "chau-phi":
+      return "Phim Châu Phi";
+    case "quoc-gia-khac":
+      return "Phim Quốc Gia Khác";
+    default:
+      return "Phim Theo Quốc Gia";
+  }
+};
+
+const currentCategoryName = slugToName(slug);
+const siteUrl = "https://motchillw.live";
+const currentUrl = `${siteUrl}/quoc-gia/${slug}`;
+const titleTag = `${currentCategoryName} Mới Nhất - Xem ${currentCategoryName} Online Vietsub | Motchill`;
+const seoDescription = `Xem ${currentCategoryName.toLowerCase()} online chất lượng cao, Vietsub miễn phí tại Motchill. Nội dung hấp dẫn, cập nhật liên tục không quảng cáo.`;
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Trang chủ",
+      item: siteUrl,
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: currentCategoryName,
+      item: currentUrl,
+    },
+  ],
+};
+---
+
+<BaseLayout>
+  <Fragment slot="head">
+    <title>{titleTag}</title>
+    <meta name="description" content={seoDescription} />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href={currentUrl} />
+
+    <meta property="og:title" content={titleTag} />
+    <meta property="og:description" content={seoDescription} />
+    <meta property="og:url" content={currentUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="vi_VN" />
+    <meta property="og:site_name" content="Motchill" />
+    <meta property="og:image" content={`${siteUrl}/logo.png`} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={titleTag} />
+    <meta name="twitter:description" content={seoDescription} />
+    <meta name="twitter:image" content={`${siteUrl}/logo.png`} />
+
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(breadcrumbSchema)}
+    />
+  </Fragment>
+
+  <div class="bg-[#191B24]">
+    <Header client:load />
+
+    <main
+      id="main-content"
+      class="container mx-auto p-4 lg:px-8 lg:flex lg:gap-10 lg:py-20"
+    >
+      <div class="w-full lg:flex-[7] flex flex-col gap-6">
+        <div class="px-0 lg:px-0">
+          <CategoryMovies
+            initialData={categoryData}
+            initialSlug={slug}
+            baseUrl={BASE_URL}
+            initialLimit={limit}
+            tittle={currentCategoryName}
+            client:load
+          />
+        </div>
+      </div>
+
+      <div class="w-full lg:flex-[3] px-0 lg:px-0">
+        <TopMovies movies={topmovies} />
+      </div>
+    </main>
+  </div>
+</BaseLayout>

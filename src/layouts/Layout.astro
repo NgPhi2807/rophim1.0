@@ -1,0 +1,39 @@
+---
+import "../styles/global.css";
+import Footer from "../components/Footer";
+import Analytics from "@vercel/analytics/astro";
+import MobileNav from "../components/Astrocomponents/MobileNav.astro";
+import AntiDevTools from "../components/Astrocomponents/AntiDevTools.astro";
+---
+
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#333333" />
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="Phim Vietsub HD mới nhất 2025"
+      href="/rss.xml"
+    />
+    <slot name="head" />
+  </head>
+  <body
+    class="bg-[#333333] font-san text-white m-0 w-full h-full lg:max-w-screen-xl lg:mx-auto"
+  >
+    <slot />
+    <Footer />
+    <Analytics />
+    <MobileNav />
+    <!-- <AntiDevTools /> -->
+  </body>
+</html>

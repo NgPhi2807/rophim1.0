@@ -1,0 +1,30 @@
+<script>
+  document.addEventListener("keydown", function (e) {
+    if (
+      e.key === "F12" ||
+      (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J")) ||
+      (e.ctrlKey && e.key === "u")
+    ) {
+      e.preventDefault();
+      window.location.href = "/";
+    }
+  });
+
+  function isDevToolsOpen() {
+    const threshold = 160;
+    return (
+      window.outerWidth - window.innerWidth > threshold ||
+      window.outerHeight - window.innerHeight > threshold
+    );
+  }
+
+  setInterval(function () {
+    const start = performance.now();
+    debugger;
+    const end = performance.now();
+
+    if (end - start > 100 || isDevToolsOpen()) {
+      window.location.href = "/";
+    }
+  }, 1000);
+</script>

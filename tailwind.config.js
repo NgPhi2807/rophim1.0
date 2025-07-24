@@ -1,0 +1,50 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ["./src/**/*.{astro,html,js,jsx,ts,tsx}"],
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: [
+          "system-ui",
+          "-apple-system",
+          '"Segoe UI"',
+          "Roboto",
+          '"Helvetica Neue"',
+          '"Noto Sans"',
+          '"Liberation Sans"',
+          "Arial",
+          "sans-serif",
+          '"Apple Color Emoji"',
+          '"Segoe UI Emoji"',
+          '"Segoe UI Symbol"',
+          '"Noto Color Emoji"',
+        ],
+        segoe: ['"Segoe UI"', "sans-serif"],
+        roboto: ["Roboto", "sans-serif"],
+        quicksand: ["Quicksand", "sans-serif"],
+        bebas: ["Bebas Neue", "sans-serif"],
+        rajdhani: ["Rajdhani", "sans-serif"],
+      },
+      gridTemplateColumns: {
+        10: "repeat(10, minmax(0, 1fr))",
+      },
+      width: {
+        "movie-col-1": "calc((100% - theme('gap.3') * 0) /1)",
+        "movie-col-2": "calc((100% - theme('gap.3') * 1) /2)",
+        "movie-col-3": "calc((100% - theme('gap.3') * 2) / 3)",
+        "movie-col-4-sm": "calc((100% - theme('gap.3') * 3) / 4)",
+        "movie-col-5-md": "calc((100% - theme('gap.3') * 4) / 5)",
+        "movie-col-6-lg": "calc((100% - theme('gap.3') * 6) / 7)",
+        "movie-card-col-2": "calc((100% - theme('gap.3') * 1) / 2)",
+        "movie-card-col-3-sm": "calc((100% - theme('gap.3') * 2) / 3)",
+        "movie-card-col-4-md": "calc((100% - theme('gap.3') * 2) / 3)",
+        "movie-card-col-4-lg": "calc((100% - theme('gap.3') * 3) / 4)",
+        "movie-card-col-3-lg": "calc((100% - theme('gap.3') * 2) / 3)",
+        "movie-card-col-5-xl": "calc((100% - theme('gap.3') * 4) / 5)",
+        "movie-card-col-4-xl": "calc((100% - theme('gap.3') * 3) / 4)",
+        "half-gap": "calc((100% - 0.75rem * 0) / 1)",
+      },
+    },
+  },
+  plugins: [],
+};

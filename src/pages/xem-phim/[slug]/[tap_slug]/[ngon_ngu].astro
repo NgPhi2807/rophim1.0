@@ -1,0 +1,360 @@
+---
+export const prerender = false;
+import BaseLayout from "../../../../layouts/Layout.astro";
+import VideoPlayer from "../../../../components/VideoPlayer";
+import Episodes from "../../../../components/Episode";
+import Header from "../../../../components/Header";
+import TopMovies from "../../../../components/TodayMovies";
+import EpisodeHeader from "../../../../components/Astrocomponents/EpisodeBreadcrumbs.astro";
+import EpisodeServerSelector from "../../../../components/Astrocomponents/EpisodeServerSelector.astro";
+import CommentBox from "../../../../components/Comment/Comments";
+import MovieDetailStaticInfo from "../../../../components/MovieDetail/MovieDetailPlayer.astro"; // Re-import this component
+
+import {
+  fetchPhimApiEpisode,
+  fetchOphim1EpisodeEmbed,
+  fetchNguoncEpisodeEmbed,
+  fetchAllMovieData,
+  generateSeoData,
+  SKIP_AD_API_URL,
+} from "../../../../utils/getMoviePlayer";
+
+const { slug, tap_slug, ngon_ngu = "vietsub" } = Astro.params;
+let so_tap = null;
+if (tap_slug === "full") {
+  so_tap = "full";
+} else if (tap_slug?.startsWith("tap-")) {
+  const numberPart = tap_slug.split("-")[1];
+  so_tap = numberPart ? String(parseInt(numberPart, 10)) : undefined;
+}
+const episodeCommentIdentifier = `tap_phim/${slug}/${tap_slug}`;
+
+const server = Astro.url.searchParams.get("server") || "sv1";
+const currentUrl = Astro.url.href;
+
+let originalVideoUrl = null;
+let phimInfo = {};
+let finalServer = server;
+let finalNgonNgu = ngon_ngu;
+let movieDetailFromSelectedServer = null;
+
+let hasSv1VideoForRequestedLang = false;
+let hasSv2VideoForRequestedLang = false;
+let hasSv3VideoForRequestedLang = false;
+
+try {
+  let fetchedData = null;
+
+  if (server === "sv1") {
+    fetchedData = await fetchPhimApiEpisode(slug, so_tap, ngon_ngu);
+  } else if (server === "sv2") {
+    fetchedData = await fetchOphim1EpisodeEmbed(slug, so_tap, ngon_ngu);
+  } else if (server === "sv3") {
+    fetchedData = await fetchNguoncEpisodeEmbed(slug, so_tap, ngon_ngu);
+  }
+
+  if (fetchedData?.link_video) {
+    originalVideoUrl = fetchedData.link_video;
+    phimInfo = fetchedData.tap_phim?.phim ?? {};
+    movieDetailFromSelectedServer = fetchedData.movie_data;
+    finalServer = server;
+    finalNgonNgu = fetchedData.actual_ngon_ngu_type || ngon_ngu;
+  } else {
+    const allServers = ["sv1", "sv2", "sv3"];
+    const allLanguages = ["vietsub", "thuyetminh", "longtieng"];
+
+    let fallbackFound = false;
+
+    for (const fbServer of allServers.filter((s) => s !== server)) {
+      let fallbackFetchedData = null;
+      if (fbServer === "sv1") {
+        fallbackFetchedData = await fetchPhimApiEpisode(slug, so_tap, ngon_ngu);
+      } else if (fbServer === "sv2") {
+        fallbackFetchedData = await fetchOphim1EpisodeEmbed(
+          slug,
+          so_tap,
+          ngon_ngu
+        );
+      } else if (fbServer === "sv3") {
+        fallbackFetchedData = await fetchNguoncEpisodeEmbed(
+          slug,
+          so_tap,
+          ngon_ngu
+        );
+      }
+
+      if (fallbackFetchedData?.link_video) {
+        originalVideoUrl = fallbackFetchedData.link_video;
+        phimInfo = fallbackFetchedData.tap_phim?.phim ?? {};
+        movieDetailFromSelectedServer = fallbackFetchedData.movie_data;
+        finalServer = fbServer;
+        finalNgonNgu = fallbackFetchedData.actual_ngon_ngu_type || ngon_ngu;
+        fallbackFound = true;
+        break;
+      }
+    }
+
+    if (!fallbackFound) {
+      for (const fbServer of allServers) {
+        for (const fbLang of allLanguages.filter((l) => l !== ngon_ngu)) {
+          let fallbackFetchedData = null;
+          if (fbServer === "sv1") {
+            fallbackFetchedData = await fetchPhimApiEpisode(
+              slug,
+              so_tap,
+              fbLang
+            );
+          } else if (fbServer === "sv2") {
+            fallbackFetchedData = await fetchOphim1EpisodeEmbed(
+              slug,
+              so_tap,
+              fbLang
+            );
+          } else if (fbServer === "sv3") {
+            fallbackFetchedData = await fetchNguoncEpisodeEmbed(
+              slug,
+              so_tap,
+              fbLang
+            );
+          }
+
+          if (fallbackFetchedData?.link_video) {
+            originalVideoUrl = fallbackFetchedData.link_video;
+            phimInfo = fallbackFetchedData.tap_phim?.phim ?? {};
+            movieDetailFromSelectedServer = fallbackFetchedData.movie_data;
+            finalServer = fbServer;
+            finalNgonNgu = fallbackFetchedData.actual_ngon_ngu_type || fbLang;
+            fallbackFound = true;
+            break;
+          }
+        }
+        if (fallbackFound) break;
+      }
+    }
+  }
+
+  const checkServerHasSpecificLangVideo = async (checkServer, checkLang) => {
+    let result = null;
+    try {
+      if (checkServer === "sv1") {
+        result = await fetchPhimApiEpisode(slug, so_tap, checkLang);
+      } else if (checkServer === "sv2") {
+        result = await fetchOphim1EpisodeEmbed(slug, so_tap, checkLang);
+      } else if (checkServer === "sv3") {
+        result = await fetchNguoncEpisodeEmbed(slug, so_tap, checkLang);
+      }
+      return result?.link_video && result?.actual_ngon_ngu_type === checkLang;
+    } catch (e) {
+      console.error(
+        `Error checking availability for ${checkServer} with ${checkLang}:`,
+        e.message
+      );
+      return false;
+    }
+  };
+
+  const [sv1AvailForReqLang, sv2AvailForReqLang, sv3AvailForReqLang] =
+    await Promise.all([
+      checkServerHasSpecificLangVideo("sv1", ngon_ngu),
+      checkServerHasSpecificLangVideo("sv2", ngon_ngu),
+      checkServerHasSpecificLangVideo("sv3", ngon_ngu),
+    ]);
+
+  hasSv1VideoForRequestedLang = sv1AvailForReqLang;
+  hasSv2VideoForRequestedLang = sv2AvailForReqLang;
+  hasSv3VideoForRequestedLang = sv3AvailForReqLang;
+  if (!originalVideoUrl) {
+    return Astro.redirect("/404");
+  }
+} catch (error) {
+  console.error("Đã xảy ra lỗi khi tải dữ liệu phim:", error);
+  return Astro.redirect("/404");
+}
+
+const { vietsubData, thuyetminhData, longtiengData, topData, total_episodes } =
+  await fetchAllMovieData(slug);
+
+let finalPhimInfo = phimInfo;
+if (!finalPhimInfo.ten_phim && !finalPhimInfo.name) {
+  if (vietsubData?.movie?.name) {
+    finalPhimInfo = vietsubData.movie;
+  } else if (thuyetminhData?.movie?.name) {
+    finalPhimInfo = thuyetminhData.movie;
+  } else if (longtiengData?.movie?.name) {
+    finalPhimInfo = longtiengData.movie;
+  }
+}
+
+const movieDetailForStaticInfo = finalPhimInfo;
+
+const vietsubEpisodesList = vietsubData?.episodes?.[0]?.server_data || [];
+const thuyetminhEpisodesList = thuyetminhData?.episodes?.[0]?.server_data || [];
+const longtiengEpisodesList = longtiengData?.episodes?.[0]?.server_data || [];
+
+const tenPhim = finalPhimInfo.name;
+const tenKhac = finalPhimInfo.origin_name;
+const rawThumbnail = finalPhimInfo.thumb_url;
+
+function chuyenURLSangProxy(url: string) {
+  if (!url) return "";
+  const originalPrefix = "https://phimimg.com/upload/";
+  const imageKitPrefix = "https://ik.imagekit.io/17mpki7mv/motchill/upload/";
+  if (url.startsWith(originalPrefix)) {
+    const path = url.slice(originalPrefix.length);
+    return `${imageKitPrefix}${path}?tr=f-webp,fo-auto,q-85`;
+  } else {
+    return url;
+  }
+}
+function chuyenURLSangProxy1(url: string) {
+  if (!url) return "";
+  const originalPrefix = "https://phimimg.com/upload/";
+  const imageKitPrefix = "https://ik.imagekit.io/17mpki7mv/motchill/upload/";
+  if (url.startsWith(originalPrefix)) {
+    const path = url.slice(originalPrefix.length);
+    return `${imageKitPrefix}${path}?tr=f-webp,w-800,h-450,fo-auto,q-85`; // Or specify a different transformation
+  } else {
+    return url;
+  }
+}
+
+const thumbnail = chuyenURLSangProxy(rawThumbnail);
+const currentEpisodeSlugParam = tap_slug;
+const currentType = finalNgonNgu;
+
+const {
+  tenPhimFormatted,
+  titleTag,
+  seoDescription,
+  episodeJsonLd,
+  breadcrumbJsonLd,
+} = generateSeoData(
+  tenPhim,
+  so_tap,
+  currentType,
+  currentUrl,
+  thumbnail,
+  slug,
+  tenKhac
+);
+---
+
+<BaseLayout>
+  <Fragment slot="head">
+    <title>{titleTag}</title>
+    <meta name="description" content={seoDescription} />
+    <meta
+      name="keywords"
+      content={`Phim ${tenPhimFormatted} tập ${so_tap}, ${tenKhac}, ${tenKhac} tập ${so_tap}, ${tenPhim}, phim ${tenPhim}, phim ${tenKhac},phim ${tenKhac} Vietsub HD, Motchill`}
+    />
+    <meta name="robots" content="index, follow" />
+
+    <link rel="canonical" href={currentUrl} />
+    <link rel="icon" href="/favicon.ico" />
+
+    <meta property="og:type" content="video.episode" />
+    <meta property="og:title" content={titleTag} />
+    <meta property="og:description" content={seoDescription} />
+    <meta property="og:image" content={thumbnail} />
+    <meta property="og:url" content={currentUrl} />
+    <meta property="og:locale" content="vi_VN" />
+    <meta property="og:site_name" content="MotChill" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={titleTag} />
+    <meta name="twitter:description" content={seoDescription} />
+    <meta name="twitter:image" content={thumbnail} />
+
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(episodeJsonLd)}
+    />
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(breadcrumbJsonLd)}
+    />
+  </Fragment>
+
+  <div class="bg-[#191B24]">
+    <Header client:idle />
+    <main class="lg:max-w-screen-xl lg:mx-auto flex flex-col gap-2 lg:gap-8">
+      <section class="w-full flex flex-col lg:py-16">
+        <div class="flex flex-col lg:flex-row gap-2 lg:gap-10 lg:px-8 px-0">
+          <div class="w-full lg:flex-[7] flex flex-col gap-4">
+            <div class="flex flex-col lg:flex-row justify-between px-4 lg:px-0">
+              <EpisodeHeader
+                slug={slug}
+                so_tap={so_tap}
+                tenPhimFormatted={tenPhimFormatted}
+                class="w-fit max-w-full"
+              />
+            </div>
+            <div class="px-0">
+              <VideoPlayer
+                client:only
+                originalUrl={originalVideoUrl}
+                skipAdApiUrl={SKIP_AD_API_URL}
+                slug={slug}
+                ngonngu={finalNgonNgu}
+                sotap={so_tap}
+                ten_phim={tenPhimFormatted}
+                activeServer={finalServer}
+                vietsubEpisodes={vietsubEpisodesList}
+                thuyetminhEpisodes={thuyetminhEpisodesList}
+                longtiengEpisodes={longtiengEpisodesList}
+                movieThumbnail={thumbnail}
+              />
+            </div>
+            <div class="flex items-center justify-center">
+              <EpisodeServerSelector
+                slug={slug}
+                so_tap={so_tap}
+                ngon_ngu={ngon_ngu}
+                server={finalServer}
+                hasSv1Video={hasSv1VideoForRequestedLang}
+                hasSv2Video={hasSv2VideoForRequestedLang}
+                hasSv3Video={hasSv3VideoForRequestedLang}
+              />
+            </div>
+            <div class="hidden lg:block py-6">
+              <MovieDetailStaticInfo
+                movie={movieDetailForStaticInfo}
+                chuyenURLSangProxy={chuyenURLSangProxy}
+                chuyenURLSangProxy1={chuyenURLSangProxy1}
+              />
+            </div>
+
+            <div class="flex flex-col lg:flex-row w-full lg:px-0 px-4 gap-8">
+              <div class="w-full lg:w-[70%] flex flex-col gap-4">
+                <Episodes
+                  client:load
+                  vietsub={vietsubEpisodesList}
+                  thuyetminh={thuyetminhEpisodesList}
+                  longtieng={longtiengEpisodesList}
+                  slug={slug}
+                  movieTitle={tenPhimFormatted}
+                  currentEpisodeSlug={currentEpisodeSlugParam}
+                  currentType={finalNgonNgu}
+                  totalEpisodes={total_episodes}
+                />
+                <div class="py-4 flex justify-center">
+                  <div class="w-[80%] h-[4px] bg-white rounded-xs"></div>
+                </div>
+                <CommentBox
+                  commentIdentifier={episodeCommentIdentifier}
+                  client:load
+                />
+              </div>
+              <div class="hidden lg:flex justify-center items-stretch">
+                <div class="w-[1px] bg-white/20"></div>
+              </div>
+              <div class="w-full lg:w-[30%] py-0 lg:py-4">
+                <TopMovies movies={topData ?? []} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</BaseLayout>

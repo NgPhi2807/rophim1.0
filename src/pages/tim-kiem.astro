@@ -1,0 +1,76 @@
+---
+import Layout from "../layouts/Layout.astro";
+import MovieSearch from "../components/MovieType/MovieSearch";
+import Header from "../components/Header.jsx";
+import TopMovies from "../components/TodayMovies";
+
+const keyword = Astro.url.searchParams.get("q") || "";
+const page = parseInt(Astro.url.searchParams.get("page") || "1");
+const BASE_URL = "https://phimapi.com";
+const TOP_URL = `${BASE_URL}/v1/api/danh-sach/phim-bo?page=1&sort_field=_id&sort_type=dsc&limit=10`;
+
+const siteUrl = "https://motphimv1.com";
+
+const fetchJson = async (url: string) => {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Lỗi khi fetch API: ${url}`);
+    return await res.json();
+  } catch (err) {
+    return null;
+  }
+};
+const topResponse = await fetchJson(TOP_URL);
+const topmovies = topResponse?.data.items || [];
+
+const pageTitle = keyword
+  ? `Tìm Kiếm Phim Với Từ Khóa" ${keyword}"`
+  : `Tìm kiếm phim - Trang ${page}`;
+
+const pageDescription = keyword
+  ? `Kết quả tìm kiếm phim cho từ khóa "${keyword}" trên Motchill. Duyệt qua hàng ngàn bộ phim và chương trình truyền hình.`
+  : `Trang tìm kiếm phim của Motchill. Khám phá các bộ phim và chương trình truyền hình yêu thích của bạn.`;
+
+const canonicalUrl = new URL(
+  `/tim-kiem?q=${encodeURIComponent(keyword)}&page=${page}`,
+  Astro.site?.toString() || siteUrl
+).href;
+---
+
+<Layout>
+  <head>
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={pageDescription} />
+  </head>
+
+  <div class="bg-[#0F0F0Fe6]">
+    <Header client:idle />
+
+    <main
+      id="main-content"
+      class="container mx-auto px-4 lg:px-8 lg:flex lg:gap-10 py-4 lg:py-20"
+    >
+      <div class="w-full lg:flex-[7] flex flex-col gap-6">
+        <div class="px-0 lg:px-0">
+          <MovieSearch
+            initialKeyword={keyword}
+            initialPage={page}
+            client:load
+          />
+        </div>
+      </div>
+      <div class="w-full lg:flex-[3] px-0 lg:px-0">
+        <TopMovies movies={topmovies} />
+      </div>
+    </main>
+  </div>
+</Layout>
