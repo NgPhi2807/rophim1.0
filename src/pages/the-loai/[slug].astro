@@ -47,42 +47,115 @@ const fetchJson = async (url: string) => {
     if (!res.ok) throw new Error(`Lỗi khi fetch API: ${url}`);
     return await res.json();
   } catch (err) {
+    console.error(`Error fetching ${url}:`, err); // Log the error for debugging
     return null;
   }
 };
 
-const categoryResponse = await fetchJson(API_URL);
-const topResponse = await fetchJson(TOP_URL);
+const [categoryResponse, topResponse] = await Promise.all([
+  fetchJson(API_URL),
+  fetchJson(TOP_URL),
+]);
+
 const categoryData = categoryResponse?.data;
 const topmovies = topResponse?.data.items || [];
+const currentCategoryName = categoryData?.titlePage || slug; // Use optional chaining
+const capitalizedCategoryName = currentCategoryName
+  .split(" ")
+  .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+  .join(" ");
 
-if (!categoryData || !topmovies) {
-  return new Response("Không thể lấy dữ liệu. Vui lòng thử lại sau.", {
+if (!categoryData) {
+  // Only check categoryData for a 500 response, topmovies can be empty
+  return new Response("Không thể lấy dữ liệu thể loại. Vui lòng thử lại sau.", {
     status: 500,
   });
 }
 
-const currentCategoryName = categoryData.titlePage || slug;
-const siteUrl = "https://motchillw.live";
+const siteUrl = "https://motphims.live";
 const currentUrl = `${siteUrl}/the-loai/${slug}`;
-const titleTag = `${currentCategoryName} Mới Nhất - Xem Phim ${currentCategoryName} Online Vietsub | Motchill`;
-const seoDescription = `Xem ${currentCategoryName.toLowerCase()} online chất lượng cao, Vietsub miễn phí tại Motchill. Nội dung hấp dẫn, cập nhật liên tục không quảng cáo.`;
+const titleTag = `Phim ${currentCategoryName} Mới Nhất | Tuyển Tập Phim Hay 2025 | Motphim`;
+const seoDescription = `Xem phim ${capitalizedCategoryName} tại Motphim Vietsub HD miễn phí, chất lượng hình ảnh đỉnh cao. Cập nhật nhanh nhất những bộ phim hấp dẫn, đảm bảo trải nghiệm xem phim tuyệt vời!`;
+const ogImage = categoryData?.items?.[0]?.thumb_url || `${siteUrl}/logo.png`;
 
-const breadcrumbSchema = {
+// Consolidated Schema.org data
+const schemaData = {
   "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  itemListElement: [
+  "@graph": [
     {
-      "@type": "ListItem",
-      position: 1,
-      name: "Trang chủ",
-      item: siteUrl,
+      "@type": "BreadcrumbList",
+      "@id": `${currentUrl}#breadcrumb`,
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Trang chủ",
+          item: siteUrl,
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: currentCategoryName,
+          item: currentUrl,
+        },
+      ],
     },
     {
-      "@type": "ListItem",
-      position: 2,
-      name: currentCategoryName,
-      item: currentUrl,
+      "@type": "CollectionPage",
+      "@id": currentUrl,
+      url: currentUrl,
+      name: titleTag,
+      description: seoDescription,
+      isPartOf: {
+        "@id": `${siteUrl}#website`,
+      },
+      breadcrumb: {
+        "@id": `${currentUrl}#breadcrumb`,
+      },
+      primaryImageOfPage: {
+        "@id": `${currentUrl}#primaryimage`,
+      },
+      image: {
+        "@id": `${currentUrl}#primaryimage`,
+      },
+      inLanguage: "vi",
+    },
+    {
+      "@type": "ImageObject",
+      "@id": `${currentUrl}#primaryimage`,
+      url: ogImage,
+      contentUrl: ogImage,
+      inLanguage: "vi",
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${siteUrl}#website`,
+      url: siteUrl,
+      name: "Motphim",
+      description: "Xem Phim Vietsub HD tại Motphim",
+      publisher: {
+        "@id": `${siteUrl}#organization`,
+      },
+      potentialAction: {
+        "@type": "SearchAction",
+        target: `${siteUrl}/tim-kiem?q={search_term_string}`,
+        "query-input": "required name=search_term_string",
+      },
+      inLanguage: "vi",
+    },
+    {
+      "@type": "Organization",
+      "@id": `${siteUrl}#organization`,
+      name: "Motphim",
+      url: siteUrl,
+      logo: {
+        "@type": "ImageObject",
+        "@id": `${siteUrl}#/schema/logo/image/`,
+        url: `${siteUrl}/logo.png`,
+        contentUrl: `${siteUrl}/logo.png`,
+        caption: "Motphim",
+        inLanguage: "vi",
+      },
     },
   ],
 };
@@ -95,25 +168,24 @@ const breadcrumbSchema = {
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href={currentUrl} />
 
+    {/* Open Graph Tags */}
     <meta property="og:title" content={titleTag} />
     <meta property="og:description" content={seoDescription} />
     <meta property="og:url" content={currentUrl} />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="vi_VN" />
-    <meta property="og:site_name" content="Motchill" />
-    <meta property="og:image" content={`${siteUrl}/logo.png`} />
+    <meta property="og:site_name" content="Motphim" />
+    <meta property="og:image" content={ogImage} />
 
+    {/* Twitter Card Tags */}
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={titleTag} />
     <meta name="twitter:description" content={seoDescription} />
-    <meta name="twitter:image" content={`${siteUrl}/logo.png`} />
+    <meta name="twitter:image" content={ogImage} />
 
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
 
-    <script
-      type="application/ld+json"
-      set:html={JSON.stringify(breadcrumbSchema)}
-    />
+    <script type="application/ld+json" set:html={JSON.stringify(schemaData)} />
   </Fragment>
 
   <div class="bg-[#191B24]">

@@ -1,6 +1,11 @@
 ---
 export const prerender = true;
 
+import BaseLayout from "../../layouts/Layout.astro";
+import Header from "../../components/Header";
+import CategoryMovies from "../../components/MovieType/MovieType";
+import TopMovies from "../../components/TodayMovies";
+
 export async function getStaticPaths() {
   return [
     { params: { slug: "phim-le" } },
@@ -9,11 +14,6 @@ export async function getStaticPaths() {
     { params: { slug: "phim-chieu-rap" } },
   ];
 }
-
-import BaseLayout from "../../layouts/Layout.astro";
-import Header from "../../components/Header";
-import CategoryMovies from "../../components/MovieType/MovieType";
-import TopMovies from "../../components/TodayMovies";
 
 const slug = Astro.params.slug;
 const initialPage = 1;
@@ -25,39 +25,130 @@ const TOP_URL = `${BASE_URL}/v1/api/danh-sach/phim-bo?page=1&sort_field=_id&sort
 const fetchJson = async (url: string) => {
   try {
     const res = await fetch(url);
-    if (!res.ok) throw new Error(`Lỗi khi fetch API: ${url}`);
+    if (!res.ok) {
+      console.error(`Error fetching API: ${url} - Status: ${res.status}`);
+      throw new Error(`Lỗi khi fetch API: ${url}`);
+    }
     return await res.json();
   } catch (err) {
+    console.error(`Fetch error for ${url}:`, err);
     return null;
   }
 };
 
-const categoryResponse = await fetchJson(API_URL);
-const topResponse = await fetchJson(TOP_URL);
+// Fetch data concurrently for better performance
+const [categoryResponse, topResponse] = await Promise.all([
+  fetchJson(API_URL),
+  fetchJson(TOP_URL),
+]);
+
 const categoryData = categoryResponse?.data;
-const topmovies = topResponse?.data.items || [];
+const topmovies = topResponse?.data?.items || [];
 
-const currentCategoryName = categoryData.titlePage || slug;
-const siteUrl = "https://motchillw.live";
-const currentUrl = `${siteUrl}/loai-phim/${slug}`;
-const titleTag = `${currentCategoryName} Mới Nhất - Xem ${currentCategoryName} Online Vietsub | Motchill`;
-const seoDescription = `Xem ${currentCategoryName.toLowerCase()} online chất lượng cao, Vietsub miễn phí tại Motchill. Nội dung hấp dẫn, cập nhật liên tục không quảng cáo.`;
-
-const breadcrumbSchema = {
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  itemListElement: [
+// Handle cases where primary category data is missing
+if (!categoryData) {
+  return new Response(
+    "Không thể lấy dữ liệu loại phim. Vui lòng thử lại sau.",
     {
-      "@type": "ListItem",
-      position: 1,
-      name: "Trang chủ",
-      item: siteUrl,
+      status: 500,
+    }
+  );
+}
+
+// Map slugs to more readable names for display and SEO
+const slugToDisplayName: Record<string, string> = {
+  "phim-le": "Phim Lẻ",
+  "phim-bo": "Phim Bộ",
+  "hoat-hinh": "Phim Hoạt Hình",
+  "phim-chieu-rap": "Phim Chiếu Rạp",
+};
+
+const currentCategoryName =
+  slugToDisplayName[slug] || categoryData.titlePage || slug; // Prefer mapped name, then API title, then slug itself
+const siteUrl = "https://motphims.live";
+const currentUrl = `${siteUrl}/loai-phim/${slug}`;
+const titleTag = `${currentCategoryName} Mới Nhất | Motphim | Xem Phim Online Miễn Phí | Phim Mới HD`;
+const seoDescription = `Khám phá kho ${currentCategoryName.toLowerCase()} mới nhất tại Motphim, hơn 10.000+ phim được chọn lọc với phụ đề Vietsub, thuyết minh, chất lượng FullHD. Xem phim online miễn phí, cập nhật liên tục!`;
+const ogImage = categoryData?.items?.[0]?.thumb_url || `${siteUrl}/logo.png`;
+
+// Consolidated Schema.org data
+const schemaData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BreadcrumbList",
+      "@id": `${currentUrl}#breadcrumb`,
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Trang chủ",
+          item: siteUrl,
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: currentCategoryName,
+          item: currentUrl,
+        },
+      ],
     },
     {
-      "@type": "ListItem",
-      position: 2,
-      name: currentCategoryName,
-      item: currentUrl,
+      "@type": "CollectionPage",
+      "@id": currentUrl,
+      url: currentUrl,
+      name: titleTag,
+      description: seoDescription,
+      isPartOf: {
+        "@id": `${siteUrl}#website`,
+      },
+      breadcrumb: {
+        "@id": `${currentUrl}#breadcrumb`,
+      },
+      primaryImageOfPage: {
+        "@id": `${currentUrl}#primaryimage`,
+      },
+      image: {
+        "@id": `${currentUrl}#primaryimage`,
+      },
+      inLanguage: "vi",
+    },
+    {
+      "@type": "ImageObject",
+      "@id": `${currentUrl}#primaryimage`,
+      url: ogImage,
+      contentUrl: ogImage,
+      inLanguage: "vi",
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${siteUrl}#website`,
+      url: siteUrl,
+      name: "Motphim",
+      description: "Xem Phim Vietsub HD tại Motphim",
+      publisher: {
+        "@id": `${siteUrl}#organization`,
+      },
+      potentialAction: {
+        "@type": "SearchAction",
+        target: `${siteUrl}/tim-kiem?q={search_term_string}`,
+        "query-input": "required name=search_term_string",
+      },
+      inLanguage: "vi",
+    },
+    {
+      "@type": "Organization",
+      "@id": `${siteUrl}#organization`,
+      name: "Motphim",
+      url: siteUrl,
+      logo: {
+        "@type": "ImageObject",
+        "@id": `${siteUrl}#/schema/logo/image/`,
+        url: `${siteUrl}/logo.png`,
+        contentUrl: `${siteUrl}/logo.png`,
+        caption: "Motphim",
+        inLanguage: "vi",
+      },
     },
   ],
 };
@@ -70,36 +161,32 @@ const breadcrumbSchema = {
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href={currentUrl} />
 
-    <!-- Open Graph -->
+    {/* Open Graph Tags */}
     <meta property="og:title" content={titleTag} />
     <meta property="og:description" content={seoDescription} />
     <meta property="og:url" content={currentUrl} />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="vi_VN" />
-    <meta property="og:site_name" content="Motchill" />
-    <meta property="og:image" content={`${siteUrl}/logo.png`} />
+    <meta property="og:site_name" content="Motphim" />
+    <meta property="og:image" content={ogImage} />
 
-    <!-- Twitter Card -->
+    {/* Twitter Card Tags */}
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={titleTag} />
     <meta name="twitter:description" content={seoDescription} />
-    <meta name="twitter:image" content={`${siteUrl}/logo.png`} />
+    <meta name="twitter:image" content={ogImage} />
 
-    <!-- Favicon -->
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
 
-    <!-- JSON-LD Breadcrumb -->
-    <script
-      type="application/ld+json"
-      set:html={JSON.stringify(breadcrumbSchema)}
-    />
+    <script type="application/ld+json" set:html={JSON.stringify(schemaData)} />
   </Fragment>
 
   <div class="bg-[#191B24]">
     <Header client:load />
+
     <main
       id="main-content"
-      class="container mx-auto lg:px-8 lg:flex lg:gap-10 p-4 lg:py-20"
+      class="container mx-auto p-4 lg:px-8 lg:flex lg:gap-10 lg:py-20"
     >
       <div class="w-full lg:flex-[7] flex flex-col gap-6">
         <CategoryMovies

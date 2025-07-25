@@ -279,7 +279,7 @@ const Episodes = ({
 
   return (
     <div className="z-20 space-y-4 py-2 lg:px-0 lg:py-4">
-      <h2 className="flex flex-col lg:flex-row text-base gap-4 font-semibold text-white lg:text-xl justify-between">
+      <h2 className="flex flex-col lg:flex-row text-base gap-4 font-medium text-white lg:text-xl justify-between">
         <div className="flex flex-row justify-between lg:gap-6 ">
           <div className="flex items-center gap-2">
             <svg

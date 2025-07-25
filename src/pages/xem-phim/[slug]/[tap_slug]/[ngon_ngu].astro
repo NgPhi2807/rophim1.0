@@ -8,7 +8,7 @@ import TopMovies from "../../../../components/TodayMovies";
 import EpisodeHeader from "../../../../components/Astrocomponents/EpisodeBreadcrumbs.astro";
 import EpisodeServerSelector from "../../../../components/Astrocomponents/EpisodeServerSelector.astro";
 import CommentBox from "../../../../components/Comment/Comments";
-import MovieDetailStaticInfo from "../../../../components/MovieDetail/MovieDetailPlayer.astro"; // Re-import this component
+import MovieDetailStaticInfo from "../../../../components/MovieDetail/MovieDetailPlayer.astro";
 
 import {
   fetchPhimApiEpisode,
@@ -33,97 +33,100 @@ const server = Astro.url.searchParams.get("server") || "sv1";
 const currentUrl = Astro.url.href;
 
 let originalVideoUrl = null;
-let phimInfo = {};
 let finalServer = server;
 let finalNgonNgu = ngon_ngu;
-let movieDetailFromSelectedServer = null;
 
+// Declare these variables outside the try block
 let hasSv1VideoForRequestedLang = false;
 let hasSv2VideoForRequestedLang = false;
 let hasSv3VideoForRequestedLang = false;
 
-try {
-  let fetchedData = null;
+// --- STEP 1: Fetch ALL movie data from the primary source (PhimAPI) once ---
+const {
+  movieData: primaryMovieInfo, // Renamed for clarity: this is our consistent movie info
+  vietsubEpisodes,
+  thuyetminhEpisodes,
+  longtiengEpisodes,
+  topData,
+  total_episodes,
+} = await fetchAllMovieData(slug);
 
+// Ensure we have at least some movie info before proceeding
+if (!primaryMovieInfo || Object.keys(primaryMovieInfo).length === 0) {
+  console.error(`No movie data found for slug: ${slug}`);
+  return Astro.redirect("/404");
+}
+
+// --- STEP 2: Try to get the video link from the selected server, then fallbacks ---
+try {
+  let fetchedEpisodeLinkData = null; // This will hold link_video and actual_ngon_ngu_type
+
+  // Try the requested server first
   if (server === "sv1") {
-    fetchedData = await fetchPhimApiEpisode(slug, so_tap, ngon_ngu);
+    fetchedEpisodeLinkData = await fetchPhimApiEpisode(slug, so_tap, ngon_ngu);
   } else if (server === "sv2") {
-    fetchedData = await fetchOphim1EpisodeEmbed(slug, so_tap, ngon_ngu);
+    fetchedEpisodeLinkData = await fetchOphim1EpisodeEmbed(
+      slug,
+      so_tap,
+      ngon_ngu
+    );
   } else if (server === "sv3") {
-    fetchedData = await fetchNguoncEpisodeEmbed(slug, so_tap, ngon_ngu);
+    fetchedEpisodeLinkData = await fetchNguoncEpisodeEmbed(
+      slug,
+      so_tap,
+      ngon_ngu
+    );
   }
 
-  if (fetchedData?.link_video) {
-    originalVideoUrl = fetchedData.link_video;
-    phimInfo = fetchedData.tap_phim?.phim ?? {};
-    movieDetailFromSelectedServer = fetchedData.movie_data;
+  // If a link is found from the requested server, use it
+  if (fetchedEpisodeLinkData?.link_video) {
+    originalVideoUrl = fetchedEpisodeLinkData.link_video;
     finalServer = server;
-    finalNgonNgu = fetchedData.actual_ngon_ngu_type || ngon_ngu;
+    finalNgonNgu = fetchedEpisodeLinkData.actual_ngon_ngu_type || ngon_ngu;
   } else {
+    // If the requested server/language combination failed, try fallbacks
     const allServers = ["sv1", "sv2", "sv3"];
     const allLanguages = ["vietsub", "thuyetminh", "longtieng"];
 
     let fallbackFound = false;
 
+    // Fallback 1: Try other servers with the *requested language*
     for (const fbServer of allServers.filter((s) => s !== server)) {
-      let fallbackFetchedData = null;
+      let fallbackData = null;
       if (fbServer === "sv1") {
-        fallbackFetchedData = await fetchPhimApiEpisode(slug, so_tap, ngon_ngu);
+        fallbackData = await fetchPhimApiEpisode(slug, so_tap, ngon_ngu);
       } else if (fbServer === "sv2") {
-        fallbackFetchedData = await fetchOphim1EpisodeEmbed(
-          slug,
-          so_tap,
-          ngon_ngu
-        );
+        fallbackData = await fetchOphim1EpisodeEmbed(slug, so_tap, ngon_ngu);
       } else if (fbServer === "sv3") {
-        fallbackFetchedData = await fetchNguoncEpisodeEmbed(
-          slug,
-          so_tap,
-          ngon_ngu
-        );
+        fallbackData = await fetchNguoncEpisodeEmbed(slug, so_tap, ngon_ngu);
       }
 
-      if (fallbackFetchedData?.link_video) {
-        originalVideoUrl = fallbackFetchedData.link_video;
-        phimInfo = fallbackFetchedData.tap_phim?.phim ?? {};
-        movieDetailFromSelectedServer = fallbackFetchedData.movie_data;
+      if (fallbackData?.link_video) {
+        originalVideoUrl = fallbackData.link_video;
         finalServer = fbServer;
-        finalNgonNgu = fallbackFetchedData.actual_ngon_ngu_type || ngon_ngu;
+        finalNgonNgu = fallbackData.actual_ngon_ngu_type || ngon_ngu;
         fallbackFound = true;
         break;
       }
     }
 
+    // Fallback 2: If still no video, try all servers with *other languages*
     if (!fallbackFound) {
       for (const fbServer of allServers) {
         for (const fbLang of allLanguages.filter((l) => l !== ngon_ngu)) {
-          let fallbackFetchedData = null;
+          let fallbackData = null;
           if (fbServer === "sv1") {
-            fallbackFetchedData = await fetchPhimApiEpisode(
-              slug,
-              so_tap,
-              fbLang
-            );
+            fallbackData = await fetchPhimApiEpisode(slug, so_tap, fbLang);
           } else if (fbServer === "sv2") {
-            fallbackFetchedData = await fetchOphim1EpisodeEmbed(
-              slug,
-              so_tap,
-              fbLang
-            );
+            fallbackData = await fetchOphim1EpisodeEmbed(slug, so_tap, fbLang);
           } else if (fbServer === "sv3") {
-            fallbackFetchedData = await fetchNguoncEpisodeEmbed(
-              slug,
-              so_tap,
-              fbLang
-            );
+            fallbackData = await fetchNguoncEpisodeEmbed(slug, so_tap, fbLang);
           }
 
-          if (fallbackFetchedData?.link_video) {
-            originalVideoUrl = fallbackFetchedData.link_video;
-            phimInfo = fallbackFetchedData.tap_phim?.phim ?? {};
-            movieDetailFromSelectedServer = fallbackFetchedData.movie_data;
+          if (fallbackData?.link_video) {
+            originalVideoUrl = fallbackData.link_video;
             finalServer = fbServer;
-            finalNgonNgu = fallbackFetchedData.actual_ngon_ngu_type || fbLang;
+            finalNgonNgu = fallbackData.actual_ngon_ngu_type || fbLang;
             fallbackFound = true;
             break;
           }
@@ -133,6 +136,8 @@ try {
     }
   }
 
+  // --- STEP 3: Check availability of other servers for the *requested language* ---
+  // This is used for the EpisodeServerSelector component
   const checkServerHasSpecificLangVideo = async (checkServer, checkLang) => {
     let result = null;
     try {
@@ -143,7 +148,13 @@ try {
       } else if (checkServer === "sv3") {
         result = await fetchNguoncEpisodeEmbed(slug, so_tap, checkLang);
       }
-      return result?.link_video && result?.actual_ngon_ngu_type === checkLang;
+      // Ensure we check actual_ngon_ngu_type for exact match, as API might return a link
+      // but categorize it under a different "actual" language (e.g., "thuyetminh" for "longtieng")
+      return (
+        result?.link_video &&
+        (result?.actual_ngon_ngu_type === checkLang ||
+          result?.actual_ngon_ngu_type === "full")
+      );
     } catch (e) {
       console.error(
         `Error checking availability for ${checkServer} with ${checkLang}:`,
@@ -153,47 +164,29 @@ try {
     }
   };
 
-  const [sv1AvailForReqLang, sv2AvailForReqLang, sv3AvailForReqLang] =
-    await Promise.all([
-      checkServerHasSpecificLangVideo("sv1", ngon_ngu),
-      checkServerHasSpecificLangVideo("sv2", ngon_ngu),
-      checkServerHasSpecificLangVideo("sv3", ngon_ngu),
-    ]);
+  [
+    hasSv1VideoForRequestedLang,
+    hasSv2VideoForRequestedLang,
+    hasSv3VideoForRequestedLang,
+  ] = await Promise.all([
+    checkServerHasSpecificLangVideo("sv1", ngon_ngu),
+    checkServerHasSpecificLangVideo("sv2", ngon_ngu),
+    checkServerHasSpecificLangVideo("sv3", ngon_ngu),
+  ]);
 
-  hasSv1VideoForRequestedLang = sv1AvailForReqLang;
-  hasSv2VideoForRequestedLang = sv2AvailForReqLang;
-  hasSv3VideoForRequestedLang = sv3AvailForReqLang;
+  // If after all attempts, no video URL is found, redirect to 404
   if (!originalVideoUrl) {
     return Astro.redirect("/404");
   }
 } catch (error) {
-  console.error("Đã xảy ra lỗi khi tải dữ liệu phim:", error);
+  console.error("Đã xảy ra lỗi khi tải dữ liệu phim hoặc tập phim:", error);
   return Astro.redirect("/404");
 }
 
-const { vietsubData, thuyetminhData, longtiengData, topData, total_episodes } =
-  await fetchAllMovieData(slug);
-
-let finalPhimInfo = phimInfo;
-if (!finalPhimInfo.ten_phim && !finalPhimInfo.name) {
-  if (vietsubData?.movie?.name) {
-    finalPhimInfo = vietsubData.movie;
-  } else if (thuyetminhData?.movie?.name) {
-    finalPhimInfo = thuyetminhData.movie;
-  } else if (longtiengData?.movie?.name) {
-    finalPhimInfo = longtiengData.movie;
-  }
-}
-
-const movieDetailForStaticInfo = finalPhimInfo;
-
-const vietsubEpisodesList = vietsubData?.episodes?.[0]?.server_data || [];
-const thuyetminhEpisodesList = thuyetminhData?.episodes?.[0]?.server_data || [];
-const longtiengEpisodesList = longtiengData?.episodes?.[0]?.server_data || [];
-
-const tenPhim = finalPhimInfo.name;
-const tenKhac = finalPhimInfo.origin_name;
-const rawThumbnail = finalPhimInfo.thumb_url;
+// Now, primaryMovieInfo is guaranteed to have data if we reached here
+const tenPhim = primaryMovieInfo.name;
+const tenKhac = primaryMovieInfo.origin_name;
+const rawThumbnail = primaryMovieInfo.thumb_url;
 
 function chuyenURLSangProxy(url: string) {
   if (!url) return "";
@@ -220,7 +213,7 @@ function chuyenURLSangProxy1(url: string) {
 
 const thumbnail = chuyenURLSangProxy(rawThumbnail);
 const currentEpisodeSlugParam = tap_slug;
-const currentType = finalNgonNgu;
+const currentType = finalNgonNgu; // Use finalNgonNgu here for consistency
 
 const {
   tenPhimFormatted,
@@ -231,7 +224,7 @@ const {
 } = generateSeoData(
   tenPhim,
   so_tap,
-  currentType,
+  currentType, // Pass currentType (actual language found)
   currentUrl,
   thumbnail,
   slug,
@@ -299,9 +292,9 @@ const {
                 sotap={so_tap}
                 ten_phim={tenPhimFormatted}
                 activeServer={finalServer}
-                vietsubEpisodes={vietsubEpisodesList}
-                thuyetminhEpisodes={thuyetminhEpisodesList}
-                longtiengEpisodes={longtiengEpisodesList}
+                vietsubEpisodes={vietsubEpisodes}
+                thuyetminhEpisodes={thuyetminhEpisodes}
+                longtiengEpisodes={longtiengEpisodes}
                 movieThumbnail={thumbnail}
               />
             </div>
@@ -318,7 +311,7 @@ const {
             </div>
             <div class="hidden lg:block py-6">
               <MovieDetailStaticInfo
-                movie={movieDetailForStaticInfo}
+                movie={primaryMovieInfo}
                 chuyenURLSangProxy={chuyenURLSangProxy}
                 chuyenURLSangProxy1={chuyenURLSangProxy1}
               />
@@ -328,9 +321,9 @@ const {
               <div class="w-full lg:w-[70%] flex flex-col gap-4">
                 <Episodes
                   client:load
-                  vietsub={vietsubEpisodesList}
-                  thuyetminh={thuyetminhEpisodesList}
-                  longtieng={longtiengEpisodesList}
+                  vietsub={vietsubEpisodes}
+                  thuyetminh={thuyetminhEpisodes}
+                  longtieng={longtiengEpisodes}
                   slug={slug}
                   movieTitle={tenPhimFormatted}
                   currentEpisodeSlug={currentEpisodeSlugParam}

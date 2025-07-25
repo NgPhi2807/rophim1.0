@@ -1,26 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
-
-export function rutGonTinhTrangPhim(tinhTrang) {
-  if (!tinhTrang) return "";
-
-  const txt = tinhTrang.toLowerCase();
-  const tapFullMatch = tinhTrang.match(/\(\d+\/\d+\)/);
-  const tapNMatch = tinhTrang.match(/tập\s*\d+(\/\d+)?/i);
-
-  if (txt.includes("hoàn tất") || txt.includes("full")) {
-    return tapFullMatch ? `Full ${tapFullMatch[0]}` : "Full";
-  }
-
-  if (tapNMatch) {
-    return `Cập nhật tới ${tapNMatch[0]}`;
-  }
-
-  if (txt.includes("update") || txt.includes("cập nhật")) {
-    return "Cập Nhật";
-  }
-
-  return tinhTrang;
-}
+import {
+  rutGonTinhTrangNgonNgu,
+  rutGonTinhTrangPhim,
+} from "../../utils/movieUtils";
 
 const BASE_URL = "https://phimapi.com";
 
@@ -29,96 +11,77 @@ export default function SearchContent({ initialKeyword, initialPage = 1 }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [pagination, setPagination] = useState({
-    current_page: initialPage, // Đây sẽ được cập nhật bởi phản hồi API
+    current_page: initialPage,
     total_pages: 1,
     total_items: 0,
     page_size: 10,
   });
 
-  // Sử dụng các trạng thái riêng biệt để điều khiển hoạt động fetch, khởi tạo từ props.
-  // Các trạng thái này sẽ thay đổi khi props ban đầu thay đổi HOẶC khi người dùng tương tác với phân trang.
   const [currentKeyword, setCurrentKeyword] = useState(initialKeyword);
   const [currentPageFetch, setCurrentPageFetch] = useState(initialPage);
 
-  // Hàm fetchSearchResults hiện đã ổn định và không phụ thuộc vào các giá trị state nội bộ
-  // như `keyword` hay `pagination.current_page` trực tiếp.
-  // Nó nhận `kw` và `pageToFetch` làm đối số tường minh.
-  const fetchSearchResults = useCallback(
-    async (kw, pageToFetch) => {
-      if (!kw) {
-        setSearchResults([]);
-        setLoading(false);
-        setPagination({
-          current_page: 1,
-          total_pages: 1,
-          total_items: 0,
-          page_size: 10,
-        });
-        return;
-      }
+  const fetchSearchResults = useCallback(async (kw, pageToFetch) => {
+    if (!kw) {
+      setSearchResults([]);
+      setLoading(false);
+      setPagination({
+        current_page: 1,
+        total_pages: 1,
+        total_items: 0,
+        page_size: 10,
+      });
+      return;
+    }
 
-      setLoading(true); // Bắt đầu tải, hiển thị spinner
-      setError(null); // Xóa lỗi cũ
-      setSearchResults([]); // Xóa kết quả cũ ngay lập tức để tránh nhấp nháy dữ liệu cũ
+    setLoading(true);
+    setError(null);
+    setSearchResults([]);
 
-      try {
-        const response = await fetch(
-          `${BASE_URL}/v1/api/tim-kiem?keyword=${encodeURIComponent(
-            kw
-          )}&page=${pageToFetch}`
-        );
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-
-        setSearchResults(data.data?.items || []);
-        setPagination(
-          data.data?.params?.pagination || {
-            current_page: 1,
-            total_pages: 1,
-            total_items: 0,
-            page_size: 10,
-          }
-        );
-
-        // Cập nhật URL trong trình duyệt mà không tải lại trang đầy đủ
-        const newUrl = `/tim-kiem?q=${encodeURIComponent(
+    try {
+      const response = await fetch(
+        `${BASE_URL}/v1/api/tim-kiem?keyword=${encodeURIComponent(
           kw
-        )}&page=${pageToFetch}`;
-        window.history.pushState(null, "", newUrl);
-      } catch (err) {
-        console.error("Lỗi khi tải kết quả tìm kiếm:", err);
-        setError("Không thể tải kết quả tìm kiếm. Vui lòng thử lại.");
-        setSearchResults([]);
-        setPagination({
+        )}&page=${pageToFetch}`
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+
+      setSearchResults(data.data?.items || []);
+      setPagination(
+        data.data?.params?.pagination || {
           current_page: 1,
           total_pages: 1,
           total_items: 0,
           page_size: 10,
-        });
-      } finally {
-        setLoading(false); // Kết thúc tải
-      }
-    },
-    [] // Mảng dependency rỗng có nghĩa là hàm này được tạo một lần và ổn định
-  );
+        }
+      );
 
-  // useEffect này xử lý các thay đổi từ props ban đầu và kích hoạt fetch.
-  // Đây là điểm trung tâm để bắt đầu các tìm kiếm.
+      const newUrl = `/tim-kiem?q=${encodeURIComponent(
+        kw
+      )}&page=${pageToFetch}`;
+      window.history.pushState(null, "", newUrl);
+    } catch (err) {
+      console.error("Lỗi khi tải kết quả tìm kiếm:", err);
+      setError("Không thể tải kết quả tìm kiếm. Vui lòng thử lại.");
+      setSearchResults([]);
+      setPagination({
+        current_page: 1,
+        total_pages: 1,
+        total_items: 0,
+        page_size: 10,
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    // Kiểm tra xem các props ban đầu có khác với trạng thái nội bộ hiện tại không.
-    // Điều này xảy ra khi Astro re-render với các tham số URL mới.
     if (initialKeyword !== currentKeyword || initialPage !== currentPageFetch) {
       setCurrentKeyword(initialKeyword);
       setCurrentPageFetch(initialPage);
-      // Không gọi fetchSearchResults trực tiếp ở đây.
-      // Phần khác của useEffect này (phụ thuộc vào currentKeyword/currentPageFetch) sẽ xử lý.
     }
-
-    // Phần này của useEffect chạy khi currentKeyword hoặc currentPageFetch thay đổi
-    // (từ đồng bộ hóa props ban đầu ở trên, hoặc từ handlePageChange).
-    // Đây là yếu tố kích hoạt thực sự để gọi fetchSearchResults.
     if (currentKeyword) {
       fetchSearchResults(currentKeyword, currentPageFetch);
     }
@@ -131,13 +94,10 @@ export default function SearchContent({ initialKeyword, initialPage = 1 }) {
   ]);
 
   const handlePageChange = (pageNumber) => {
-    // Cập nhật trạng thái currentPageFetch. Điều này sẽ tự động kích hoạt useEffect ở trên
-    // để gọi fetchSearchResults với số trang mới.
     setCurrentPageFetch(pageNumber);
   };
 
-  const { current_page, total_pages, total_items } = pagination; // Dùng trạng thái pagination cho hiển thị phân trang
-
+  const { current_page, total_pages, total_items } = pagination;
   const paginationItems = [];
   const start = Math.max(1, current_page - 2);
   const end = Math.min(total_pages, start + 4);
@@ -149,7 +109,7 @@ export default function SearchContent({ initialKeyword, initialPage = 1 }) {
     <div className="mx-auto text-white">
       <h1 className="mb-6 text-lg lg:text-xl font-bold">
         Kết quả tìm kiếm cho:
-        <span className="text-green-400">"{currentKeyword}"</span>
+        <span className="text-[#ffd785]">"{currentKeyword}"</span>
       </h1>
 
       {loading && (
@@ -201,11 +161,11 @@ export default function SearchContent({ initialKeyword, initialPage = 1 }) {
                           cx="30"
                           cy="30"
                           r="30"
-                          className="fill-green-500 transition-colors duration-200"
+                          className="fill-[#ffd785] transition-colors duration-200"
                         />
                         <path
                           d="M35.7461509,22.4942263 L45.1405996,36.5858994 C46.059657,37.9644855 45.6871354,39.8270935 44.3085493,40.7461509 C43.8157468,41.0746859 43.2367237,41.25 42.6444487,41.25 L23.8555513,41.25 C22.198697,41.25 20.8555513,39.9068542 20.8555513,38.25 C20.8555513,37.657725 21.0308654,37.078702 21.3594004,36.5858994 L30.7538491,22.4942263 C31.6729065,21.1156403 33.5355145,20.7431187 34.9141006,21.662176 C35.2436575,21.8818806 35.5264463,22.1646695 35.7461509,22.4942263 Z"
-                          fill="#FFFFFF"
+                          fill="#000000"
                           transform="translate(33.25, 30) rotate(-270) translate(-33.25, -30)"
                         />
                       </svg>
@@ -221,7 +181,7 @@ export default function SearchContent({ initialKeyword, initialPage = 1 }) {
 
                   <div className="pb-4 pt-2">
                     <p
-                      className="line-clamp-2 text-[13px] font-semibold text-gray-200 hover:text-green-400"
+                      className="line-clamp-2 text-[13px] font-semibold text-gray-200 hover:text-[#ffd785]"
                       title={movie.name}
                     >
                       {movie.name}

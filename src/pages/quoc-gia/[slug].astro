@@ -66,116 +66,144 @@ const fetchJson = async (url: string) => {
   }
 };
 
-const categoryResponse = await fetchJson(API_URL);
-const topResponse = await fetchJson(TOP_URL);
+const [categoryResponse, topResponse] = await Promise.all([
+  fetchJson(API_URL),
+  fetchJson(TOP_URL),
+]);
 
 const categoryData = categoryResponse?.data;
 const topmovies = topResponse?.data?.items || [];
 
-if (!categoryData || !topmovies) {
-  return new Response("Không thể lấy dữ liệu. Vui lòng thử lại sau.", {
+if (!categoryData) {
+  return new Response("Không thể lấy dữ liệu thể loại. Vui lòng thử lại sau.", {
     status: 500,
   });
 }
 
-const slugToName = (s: string) => {
-  switch (s) {
-    case "viet-nam":
-      return "Phim Việt Nam";
-    case "han-quoc":
-      return "Phim Hàn Quốc";
-    case "au-my":
-      return "Phim Âu Mỹ";
-    case "trung-quoc":
-      return "Phim Trung Quốc";
-    case "nhat-ban":
-      return "Phim Nhật Bản";
-    case "thai-lan":
-      return "Phim Thái Lan";
-    case "an-do":
-      return "Phim Ấn Độ";
-    case "phap":
-      return "Phim Pháp";
-    case "anh":
-      return "Phim Anh";
-    case "nga":
-      return "Phim Nga";
-    case "duc":
-      return "Phim Đức";
-    case "y":
-      return "Phim Ý";
-    case "tay-ban-nha":
-      return "Phim Tây Ban Nha";
-    case "uc":
-      return "Phim Úc";
-    case "canada":
-      return "Phim Canada";
-    case "philippines":
-      return "Phim Philippines";
-    case "indonesia":
-      return "Phim Indonesia";
-    case "malaysia":
-      return "Phim Malaysia";
-    case "hong-kong":
-      return "Phim Hong Kong";
-    case "mexico":
-      return "Phim Mexico";
-    case "dan-mach":
-      return "Phim Đan Mạch";
-    case "thuy-dien":
-      return "Phim Thụy Điển";
-    case "thuy-si":
-      return "Phim Thụy Sĩ";
-    case "ukraina":
-      return "Phim Ukraina";
-    case "ba-lan":
-      return "Phim Ba Lan";
-    case "bo-dao-nha":
-      return "Phim Bồ Đào Nha";
-    case "u-a-e":
-      return "Phim UAE";
-    case "dai-loan":
-      return "Phim Đài Loan";
-    case "a-rap-xe-ut":
-      return "Phim Ả Rập Xê Út";
-    case "tho-nhi-ky":
-      return "Phim Thổ Nhĩ Kỳ";
-    case "brazil":
-      return "Phim Brazil";
-    case "nam-phi":
-      return "Phim Nam Phi";
-    case "na-uy":
-      return "Phim Na Uy";
-    case "chau-phi":
-      return "Phim Châu Phi";
-    case "quoc-gia-khac":
-      return "Phim Quốc Gia Khác";
-    default:
-      return "Phim Theo Quốc Gia";
-  }
+// Map slug to a display name for countries
+const countryNames: { [key: string]: string } = {
+  "viet-nam": "Phim Việt Nam",
+  "han-quoc": "Phim Hàn Quốc",
+  "au-my": "Phim Âu Mỹ",
+  "trung-quoc": "Phim Trung Quốc",
+  "nhat-ban": "Phim Nhật Bản",
+  "thai-lan": "Phim Thái Lan",
+  "an-do": "Phim Ấn Độ",
+  phap: "Phim Pháp",
+  anh: "Phim Anh",
+  nga: "Phim Nga",
+  duc: "Phim Đức",
+  y: "Phim Ý",
+  "tay-ban-nha": "Phim Tây Ban Nha",
+  uc: "Phim Úc",
+  canada: "Phim Canada",
+  philippines: "Phim Philippines",
+  indonesia: "Phim Indonesia",
+  malaysia: "Phim Malaysia",
+  "hong-kong": "Phim Hong Kong",
+  mexico: "Phim Mexico",
+  "dan-mach": "Phim Đan Mạch",
+  "thuy-dien": "Phim Thụy Điển",
+  "thuy-si": "Phim Thụy Sĩ",
+  ukraina: "Phim Ukraina",
+  "ba-lan": "Phim Ba Lan",
+  "bo-dao-nha": "Phim Bồ Đào Nha",
+  "u-a-e": "Phim UAE",
+  "dai-loan": "Phim Đài Loan",
+  "a-rap-xe-ut": "Phim Ả Rập Xê Út",
+  "tho-nhi-ky": "Phim Thổ Nhĩ Kỳ",
+  brazil: "Phim Brazil",
+  "nam-phi": "Phim Nam Phi",
+  "na-uy": "Phim Na Uy",
+  "chau-phi": "Phim Châu Phi",
+  "quoc-gia-khac": "Phim Quốc Gia Khác",
 };
 
-const currentCategoryName = slugToName(slug);
-const siteUrl = "https://motchillw.live";
+const currentCategoryName = countryNames[slug] || "Phim Theo Quốc Gia";
+const siteUrl = "https://motphims.live";
 const currentUrl = `${siteUrl}/quoc-gia/${slug}`;
-const titleTag = `${currentCategoryName} Mới Nhất - Xem ${currentCategoryName} Online Vietsub | Motchill`;
-const seoDescription = `Xem ${currentCategoryName.toLowerCase()} online chất lượng cao, Vietsub miễn phí tại Motchill. Nội dung hấp dẫn, cập nhật liên tục không quảng cáo.`;
+const titleTag = `${currentCategoryName} Mới Nhất 2025 | Xem ${currentCategoryName} Online Vietsub Tại Motphim`;
+const seoDescription = `Xem ${currentCategoryName.toLowerCase()} online chất lượng cao, Vietsub miễn phí tại Motphim. Nội dung hấp dẫn, cập nhật liên tục không quảng cáo.`;
+const ogImage = categoryData?.items?.[0]?.thumb_url || `${siteUrl}/logo.png`;
 
-const breadcrumbSchema = {
+// Consolidated Schema.org data
+const schemaData = {
   "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  itemListElement: [
+  "@graph": [
     {
-      "@type": "ListItem",
-      position: 1,
-      name: "Trang chủ",
-      item: siteUrl,
+      "@type": "BreadcrumbList",
+      "@id": `${currentUrl}#breadcrumb`,
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Trang chủ",
+          item: siteUrl,
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: currentCategoryName,
+          item: currentUrl,
+        },
+      ],
     },
     {
-      "@type": "ListItem",
-      position: 2,
-      name: currentCategoryName,
-      item: currentUrl,
+      "@type": "CollectionPage",
+      "@id": currentUrl,
+      url: currentUrl,
+      name: titleTag,
+      description: seoDescription,
+      isPartOf: {
+        "@id": `${siteUrl}#website`,
+      },
+      breadcrumb: {
+        "@id": `${currentUrl}#breadcrumb`,
+      },
+      primaryImageOfPage: {
+        "@id": `${currentUrl}#primaryimage`,
+      },
+      image: {
+        "@id": `${currentUrl}#primaryimage`,
+      },
+      inLanguage: "vi",
+    },
+    {
+      "@type": "ImageObject",
+      "@id": `${currentUrl}#primaryimage`,
+      url: ogImage,
+      contentUrl: ogImage,
+      inLanguage: "vi",
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${siteUrl}#website`,
+      url: siteUrl,
+      name: "Motphim",
+      description: "Xem Phim Vietsub HD tại Motphim",
+      publisher: {
+        "@id": `${siteUrl}#organization`,
+      },
+      potentialAction: {
+        "@type": "SearchAction",
+        target: `${siteUrl}/tim-kiem?q={search_term_string}`,
+        "query-input": "required name=search_term_string",
+      },
+      inLanguage: "vi",
+    },
+    {
+      "@type": "Organization",
+      "@id": `${siteUrl}#organization`,
+      name: "Motphim",
+      url: siteUrl,
+      logo: {
+        "@type": "ImageObject",
+        "@id": `${siteUrl}#/schema/logo/image/`,
+        url: `${siteUrl}/logo.png`,
+        contentUrl: `${siteUrl}/logo.png`,
+        caption: "Motphim",
+        inLanguage: "vi",
+      },
     },
   ],
 };
@@ -188,25 +216,24 @@ const breadcrumbSchema = {
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href={currentUrl} />
 
+    {/* Open Graph Tags */}
     <meta property="og:title" content={titleTag} />
     <meta property="og:description" content={seoDescription} />
     <meta property="og:url" content={currentUrl} />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="vi_VN" />
-    <meta property="og:site_name" content="Motchill" />
-    <meta property="og:image" content={`${siteUrl}/logo.png`} />
+    <meta property="og:site_name" content="Motphim" />
+    <meta property="og:image" content={ogImage} />
 
+    {/* Twitter Card Tags */}
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={titleTag} />
     <meta name="twitter:description" content={seoDescription} />
-    <meta name="twitter:image" content={`${siteUrl}/logo.png`} />
+    <meta name="twitter:image" content={ogImage} />
 
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
 
-    <script
-      type="application/ld+json"
-      set:html={JSON.stringify(breadcrumbSchema)}
-    />
+    <script type="application/ld+json" set:html={JSON.stringify(schemaData)} />
   </Fragment>
 
   <div class="bg-[#191B24]">

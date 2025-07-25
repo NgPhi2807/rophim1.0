@@ -5,8 +5,8 @@ import {
 } from "../../utils/movieUtils";
 
 export default function CategoryMovies({
-  initialData, // initialData now contains the 'data' object from the API response
-  initialSlug, // This is the {type_list} for the API, now representing the category slug
+  initialData,
+  initialSlug,
   baseUrl,
   initialLimit,
   tittle,

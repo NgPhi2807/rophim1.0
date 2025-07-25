@@ -420,7 +420,7 @@ export default function Header() {
                   onResultClick(movie);
                 }
               }}
-              className="flex cursor-pointer items-center space-x-3 rounded-md px-3 py-3 transition-all duration-200 focus:bg-white/10 focus:outline-none"
+              className="flex cursor-pointer items-center space-x-3 rounded-md px-3 py-3 transition-all duration-200  focus:bg-white/10 focus:outline-none"
               role="option"
               tabIndex={0}
               aria-selected={false}
@@ -495,7 +495,7 @@ export default function Header() {
               closeAllPopups();
             }
           }}
-          className="fixed inset-0 z-40 bg-[#0F111A] lg:hidden"
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
           role="button"
           tabIndex={0}
           aria-label="Đóng overlay"
@@ -508,12 +508,12 @@ export default function Header() {
           scrolled ||
           mobileMenuOpen ||
           (mobileSearchQuery.length >= 2 && showMobileSearchResults)
-            ? "bg-[#0F111A]"
+            ? "bg-[#020202]"
             : "bg-transparent"
         } sm:fixed sm:left-0 sm:right-0 sm:top-0`}
         role="banner"
       >
-        <div className="relative flex h-16 w-full items-center justify-between px-3 lg:px-7 md:h-18">
+        <div className="relative md:mx-auto md:container flex h-16 w-full items-center justify-between px-3 lg:px-7 md:h-18">
           <div className="flex flex-grow items-center gap-2 lg:gap-4">
             <div className="flex items-center lg:hidden">
               <button
@@ -537,11 +537,7 @@ export default function Header() {
                 alt="Logo trang web phim"
                 className="h-9 lg:h-10 w-auto mb-2"
               />
-              <h1 className="sr-only">
-                Xem Phim Vietsub, Thuyết Minh HD Mới Nhất Miễn Phí Tại Motchill
-              </h1>
             </a>
-
             <div className="relative flex-grow lg:hidden">
               <form
                 onSubmit={handleMobileSearchSubmit}
@@ -637,7 +633,7 @@ export default function Header() {
                 </button>
                 {showTheLoai && (
                   <div
-                    className="absolute left-0 top-full z-[51] mt-2 w-80 overflow-hidden rounded-lg bg-[#191a1f] shadow-2xl backdrop-blur-xl"
+                    className="absolute left-0 top-full z-[51] mt-2 w-80 overflow-hidden rounded-lg bg-[#23252b] shadow-2xl backdrop-blur-xl"
                     role="menu"
                     aria-labelledby="theloai-button"
                     id="theloai-dropdown"
@@ -680,7 +676,7 @@ export default function Header() {
                 </button>
                 {showQuocGia && (
                   <div
-                    className="absolute left-0 top-full z-[51] mt-2 w-96 overflow-hidden rounded-lg bg-[#191a1f] shadow-2xl backdrop-blur-xl"
+                    className="absolute left-0 top-full z-[51] mt-2 w-96 overflow-hidden rounded-lg  bg-[#23252b] shadow-2xl backdrop-blur-xl"
                     role="menu"
                     aria-labelledby="quocgia-button"
                     id="quocgia-dropdown"
@@ -736,7 +732,7 @@ export default function Header() {
                     }
                   }}
                   placeholder="Tìm kiếm phim..."
-                  className="rounded-lg w-[22rem] bg-[#ffffff14] px-3 py-2 pr-12 text-sm text-white placeholder-white focus:outline-none"
+                  className="rounded-lg w-[22rem] bg-[#ffffff14] px-3 py-2 pr-12 text-sm text-white placeholder-white/60 focus:outline-none"
                   autoComplete="off"
                   aria-describedby={
                     showDesktopSearchResults ? "search-results" : undefined
@@ -747,7 +743,7 @@ export default function Header() {
                 />
                 <button
                   type="submit"
-                  className="absolute right-3 top-1/2 flex h-6 -translate-y-1/2 transform items-center gap-2 border-l border-white/30 pl-3 text-white transition-colors hover:text-white"
+                  className="absolute right-3 top-1/2 flex h-6 -translate-y-1/2 transform items-center gap-2 border-l border-white/30 pl-3 text-white/70 transition-colors hover:text-white"
                   aria-label="Tìm kiếm"
                 >
                   <SearchIcon />
@@ -755,7 +751,7 @@ export default function Header() {
               </form>
               {showDesktopSearchResults && desktopSearchQuery.length > 1 && (
                 <div
-                  className="absolute right-0 top-full z-[50] mt-2 max-h-[60vh] w-full overflow-y-auto rounded-md bg-[#1a1c22] shadow-2xl backdrop-blur-xl"
+                  className="absolute right-0 top-full z-50 mt-2 max-h-[60vh] w-full overflow-y-auto rounded-lg bg-[#1a1c22] shadow-2xl backdrop-blur-xl"
                   id="search-results"
                 >
                   <SearchResultsDropdown
@@ -773,7 +769,7 @@ export default function Header() {
 
         {showMobileSearchResults && mobileSearchQuery.length > 1 && (
           <div
-            className="mobile-search-results-dropdown absolute left-0 right-0 top-16 z-[999999] max-h-[80vh] overflow-y-auto rounded-md bg-[#000000]/50 shadow-2xl backdrop-blur-xl lg:hidden"
+            className="mobile-search-results-dropdown absolute left-0 right-0 top-16 z-[51] max-h-[80vh] overflow-y-auto rounded-md  bg-[#1f1f29] shadow-2xl backdrop-blur-xl lg:hidden"
             onClick={(e) => e.stopPropagation()}
             onTouchEnd={(e) => e.stopPropagation()}
             id="mobile-search-results"
@@ -791,12 +787,12 @@ export default function Header() {
         {mobileMenuOpen && (
           <div
             ref={mobileMenuPanelRef}
-            className="absolute left-0 right-0 top-16 z-[99999] border-t border-white/10 bg-[#1f1f29] text-sm backdrop-blur-xl lg:hidden"
+            className="absolute left-4 right-4 top-16 w-[70%] z-[51] border-t border-white/10 bg-[#1f1f29] text-sm backdrop-blur-xl lg:hidden rounded-lg"
             id="mobile-menu"
             role="navigation"
             aria-label="Menu di động"
           >
-            <div className="space-y-1 px-2 py-2">
+            <div className="space-y-1 px-2 py-2 grid grid-cols-2">
               {[
                 { href: "/loai-phim/phim-le", label: "Phim Lẻ" },
                 { href: "/loai-phim/phim-bo", label: "Phim Bộ" },

@@ -1,27 +1,8 @@
 import { useState, useCallback, useEffect } from "react";
-
-export function rutGonTinhTrangPhim(tinhTrang) {
-  if (!tinhTrang) return "";
-
-  const txt = tinhTrang.toLowerCase();
-  const tapFullMatch = tinhTrang.match(/\(\d+\/\d+\)/);
-  const tapNMatch = tinhTrang.match(/tập\s*\d+(\/\d+)?/i);
-
-  if (txt.includes("hoàn tất") || txt.includes("full")) {
-    return tapFullMatch ? `Full ${tapFullMatch[0]}` : "Full";
-  }
-
-  if (tapNMatch) {
-    return `Cập nhật tới ${tapNMatch[0]}`;
-  }
-
-  if (txt.includes("update") || txt.includes("cập nhật")) {
-    return "Cập Nhật";
-  }
-
-  return tinhTrang;
-}
-
+import {
+  rutGonTinhTrangNgonNgu,
+  rutGonTinhTrangPhim,
+} from "../../utils/movieUtils";
 export default function CountryMovies({
   initialData,
   initialSlug,
@@ -279,7 +260,7 @@ export default function CountryMovies({
       <div className="">
         <div className="flex flex-row items-center justify-between gap-8 lg:justify-start">
           <h1 className="lg:text-xl text-lg font-semibold text-white">
-            Tuyển Tập {tittle}
+            {tittle}
           </h1>
           <button
             onClick={() => setIsFilterExpanded(!isFilterExpanded)}
@@ -455,12 +436,8 @@ export default function CountryMovies({
         )}
       </div>
 
-      {/* Loading indicator */}
       {loading && (
-        <div className="mt-8 text-center text-white">
-          Đang tải phim...
-          {/* Bạn có thể thêm spinner hoặc icon loading ở đây */}
-        </div>
+        <div className="mt-8 text-center text-white">Đang tải phim...</div>
       )}
 
       {error && <div className="mt-8 text-center text-red-500">{error}</div>}
@@ -506,27 +483,44 @@ export default function CountryMovies({
                         cx="30"
                         cy="30"
                         r="30"
-                        className="fill-green-500 transition-colors duration-200"
+                        className="fill-[#ffd875] transition-colors duration-200"
                       />
                       <path
                         d="M35.7461509,22.4942263 L45.1405996,36.5858994 C46.059657,37.9644855 45.6871354,39.8270935 44.3085493,40.7461509 C43.8157468,41.0746859 43.2367237,41.25 42.6444487,41.25 L23.8555513,41.25 C22.198697,41.25 20.8555513,39.9068542 20.8555513,38.25 C20.8555513,37.657725 21.0308654,37.078702 21.3594004,36.5858994 L30.7538491,22.4942263 C31.6729065,21.1156403 33.5355145,20.7431187 34.9141006,21.662176 C35.2436575,21.8818806 35.5264463,22.1646695 35.7461509,22.4942263 Z"
-                        fill="#FFFFFF"
+                        fill="#000000"
                         transform="translate(33.25, 30) rotate(-270) translate(-33.25, -30)"
                       />
                     </svg>
                   </div>
-                  <div className="absolute bottom-1 z-10 left-1">
-                    {movie.episode_current && (
-                      <span className="px-0.5 z-20 py-0.5 text-[12px] font-bold leading-tight text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
-                        {rutGonTinhTrangPhim(movie.episode_current)}
-                      </span>
-                    )}
+                  <div className="absolute bottom-2 lg:bottom-0 left-2 lg:left-1/2 transform -translate-x-0 lg:-translate-x-1/2 flex flex-col lg:flex-row z-20 text-[10px] lg:text-[11px] font-semibold leading-tight text-white gap-1 lg:gap-0">
+                    <span
+                      className="whitespace-nowrap px-2 py-0.5 lg:py-1 rounded-md lg:rounded-none lg:rounded-tl-md bg-[#5e6070]"
+                      aria-label={`Tình trạng phim: ${movie.episode_current}`}
+                    >
+                      {rutGonTinhTrangPhim(movie.episode_current)}
+                    </span>
+                    <span
+                      className="whitespace-nowrap w-fit px-2 py-0.5 lg:py-1 rounded-md lg:rounded-none lg:rounded-tr-md bg-[#2ca35d]"
+                      aria-label={`Ngôn ngữ phim: ${movie.lang}`}
+                    >
+                      {rutGonTinhTrangNgonNgu(movie.lang)}
+                    </span>
+                  </div>
+                  <div className="absolute top-2 left-2 bg-black/70 backdrop-blur-3xl rounded-md py-1 px-2 shadow-md">
+                    <div className="flex flex-row items-center gap-1 font-bold justify-center text-white text-[10px] lg:text-xs leading-tight">
+                      <p className="text-[#f0d25c]">IMDb</p>
+                      <p className="flex items-center">
+                        {movie.tmdb.vote_average === 0
+                          ? 10
+                          : movie.tmdb.vote_average.toFixed(1)}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
                 <div className="pt-2 pb-4">
                   <p
-                    className="line-clamp-2 text-[13px] font-semibold text-gray-200 hover:text-green-400"
+                    className="line-clamp-2 text-[13px] font-semibold text-gray-200 hover:text-[#ffd875]"
                     title={movie.name}
                   >
                     {movie.name}

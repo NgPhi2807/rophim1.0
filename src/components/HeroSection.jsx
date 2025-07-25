@@ -169,12 +169,8 @@ export default function MovieCard({ movies: initialMovies = [] }) {
         >
           {/* Chỉ render phim hiện tại (currentMovie) */}
           <div className="group movie-card-item movie-hero-width ">
-            <a
-              href={`/phim/${currentMovie.slug}`}
-              title={currentMovie.name}
-              className="relative block aspect-[16/9] lg:aspect-[16/7] w-full overflow-hidden rounded-none lg:rounded-[4px]"
-              aria-label={`Xem phim ${currentMovie.name}`}
-            >
+            {/* Removed the <a> tag around the image */}
+            <div className="relative block aspect-[16/9] lg:aspect-[16/7] w-full overflow-hidden rounded-none lg:rounded-[4px]">
               <AnimatePresence initial={false}>
                 <motion.img
                   key={currentMovie._id || currentMovie.slug}
@@ -220,8 +216,8 @@ export default function MovieCard({ movies: initialMovies = [] }) {
                   ))}
                 </div>
               )}
-            </a>{" "}
-            <div className="absolute bottom-5 lg:bottom-20 left-4 flex flex-col gap-1 lg:gap-3 text-white z-[9999] lg:left-16 drop-shadow-[0_20px_20px_rgba(0,0,0,10)]">
+            </div>{" "}
+            <div className="absolute bottom-5 lg:bottom-20 left-4 flex flex-col gap-1 lg:gap-3 text-white z-20 lg:left-16 drop-shadow-[0_20px_20px_rgba(0,0,0,10)]">
               <h2
                 className="line-clamp-1 text-lg lg:text-3xl font-bold "
                 id={`movie-title-${currentMovie.id || currentMovie.slug}`}

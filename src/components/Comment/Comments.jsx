@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef } from "react";
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, push, onValue, update } from "firebase/database";
 
-// Your Firebase config (unchanged)
 const firebaseConfig = {
   apiKey: "AIzaSyASSvFwOCSEPnVeX5wP7HkcCf0kK-9CGiw",
   authDomain: "node-1d576.firebaseapp.com",
@@ -15,16 +14,14 @@ const firebaseConfig = {
   measurementId: "G-QS6SVMBE6F",
 };
 
-// Init Firebase (unchanged)
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
-// Define how many comments to load initially and per "load more" click
 const INITIAL_LOAD_COUNT = 10;
 const LOAD_MORE_COUNT = 10;
-const MAX_COMMENT_LENGTH = 1000; // Max characters for comment
+const MAX_COMMENT_LENGTH = 1000;
+const COMMENT_COOLDOWN_SECONDS = 15;
 
-// Generate unique device ID
 const getDeviceId = () => {
   if (typeof window !== "undefined") {
     let deviceId = localStorage.getItem("deviceId");
@@ -59,9 +56,11 @@ export default function CommentBox({ commentIdentifier }) {
   const [userLikes, setUserLikes] = useState({});
   const [isSending, setIsSending] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [showUserDetails, setShowUserDetails] = useState(false); // State for "Tiết lộ?" toggle
+  const [showUserDetails, setShowUserDetails] = useState(false);
+  const [cooldownRemaining, setCooldownRemaining] = useState(0);
 
   const deviceId = getDeviceId();
+  const cooldownTimerRef = useRef(null);
 
   useEffect(() => {
     if (!deviceId || !commentIdentifier) return;
@@ -90,11 +89,60 @@ export default function CommentBox({ commentIdentifier }) {
       setVisibleCommentCount(INITIAL_LOAD_COUNT);
     });
 
-    return () => unsubscribe();
+    // Load last post time from localStorage on component mount
+    if (typeof window !== "undefined") {
+      const lastPostTime = parseInt(
+        localStorage.getItem("lastCommentPostTime") || "0",
+        10
+      );
+      const timeSinceLastPost = Math.floor((Date.now() - lastPostTime) / 1000);
+
+      if (timeSinceLastPost < COMMENT_COOLDOWN_SECONDS) {
+        setCooldownRemaining(COMMENT_COOLDOWN_SECONDS - timeSinceLastPost);
+      }
+    }
+
+    return () => {
+      unsubscribe();
+      // Clear any running cooldown timer on unmount
+      if (cooldownTimerRef.current) {
+        clearInterval(cooldownTimerRef.current);
+      }
+    };
   }, [commentIdentifier, deviceId]);
+
+  // Effect to manage the cooldown timer
+  useEffect(() => {
+    if (cooldownRemaining > 0) {
+      cooldownTimerRef.current = setInterval(() => {
+        setCooldownRemaining((prev) => {
+          if (prev <= 1) {
+            clearInterval(cooldownTimerRef.current);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    // Cleanup function to clear interval if component unmounts or cooldown finishes
+    return () => {
+      if (cooldownTimerRef.current) {
+        clearInterval(cooldownTimerRef.current);
+      }
+    };
+  }, [cooldownRemaining]); // Only re-run when cooldownRemaining changes
 
   const handleSend = async () => {
     setErrorMessage("");
+
+    // NEW: Check cooldown before sending
+    if (cooldownRemaining > 0) {
+      setErrorMessage(
+        `Vui lòng đợi ${cooldownRemaining} giây trước khi bình luận lại.`
+      );
+      return;
+    }
 
     if (!ten.trim() && showUserDetails) {
       setErrorMessage("Tên không được để trống.");
@@ -141,6 +189,7 @@ export default function CommentBox({ commentIdentifier }) {
       thoiGian: new Date().toISOString(),
       likes: 0,
       votes: {},
+      deviceId: deviceId, // NEW: Include deviceId in comment data for potential server-side checks
     };
 
     const commentRef = ref(database, `binhluan/${commentIdentifier}`);
@@ -148,9 +197,15 @@ export default function CommentBox({ commentIdentifier }) {
     try {
       await push(commentRef, commentData);
       setNoiDung("");
-      if (typeof window !== "undefined" && showUserDetails) {
-        localStorage.setItem("userName", ten);
-        localStorage.setItem("userEmail", email);
+      if (typeof window !== "undefined") {
+        // Save user details if revealed
+        if (showUserDetails) {
+          localStorage.setItem("userName", ten);
+          localStorage.setItem("userEmail", email);
+        }
+        // NEW: Set last post time and start cooldown
+        localStorage.setItem("lastCommentPostTime", Date.now().toString());
+        setCooldownRemaining(COMMENT_COOLDOWN_SECONDS);
       }
     } catch (error) {
       console.error("Error sending comment:", error);
@@ -287,6 +342,12 @@ export default function CommentBox({ commentIdentifier }) {
     </div>
   );
 
+  const isSendButtonDisabled =
+    isSending ||
+    noiDung.trim().length === 0 ||
+    (showUserDetails && ten.trim().length === 0) ||
+    cooldownRemaining > 0; // NEW: Disable if cooldown is active
+
   return (
     <div className="py-6 text-white font-sans">
       <h3 className="text-base flex flex-row gap-3 lg:text-xl font-semibold text-gray-100 items-center pb-6">
@@ -403,14 +464,17 @@ export default function CommentBox({ commentIdentifier }) {
           {/* Gửi button */}
           <button
             onClick={handleSend}
-            disabled={
-              isSending ||
-              noiDung.trim().length === 0 ||
-              (showUserDetails && ten.trim().length === 0)
-            }
-            className="flex items-center gap-2 font-semibold text-[#FFD875]" // Adjusted padding for arrow
+            disabled={isSendButtonDisabled} // Use the new disabled state
+            className={`flex items-center gap-2 font-semibold ${
+              isSendButtonDisabled
+                ? "text-gray-500 cursor-not-allowed"
+                : "text-[#FFD875] hover:text-[#FFDF91]"
+            } transition-colors duration-200`}
           >
             Gửi
+            {cooldownRemaining > 0 && (
+              <span className="ml-1 text-xs">({cooldownRemaining}s)</span>
+            )}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="20"
@@ -426,7 +490,6 @@ export default function CommentBox({ commentIdentifier }) {
         </div>
       </div>
 
-      {/* Existing comments list */}
       <div className="mb-8 space-y-2 text-sm">
         {commentsToDisplay.map((comment, i) => (
           <CommentItem key={comment.id || i} comment={comment} />

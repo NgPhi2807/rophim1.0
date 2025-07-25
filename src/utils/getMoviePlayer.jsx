@@ -1,3 +1,5 @@
+// src/utils/getMoviePlayer.js (or .ts)
+
 import axios from "axios";
 
 const BASE_URL = import.meta.env.PUBLIC_API_SKIP_URL;
@@ -82,13 +84,15 @@ export const fetchJson = async (url, instance = axiosInstance) => {
   }
 };
 
+// ** Modified fetchPhimApiEpisode to NOT return movie_data.
+// It will only return the link_video and actual_ngon_ngu_type**
 export const fetchPhimApiEpisode = async (slug, so_tap, ngon_ngu) => {
   try {
     const movieDetail = await fetchJson(`/phim/${slug}`, phimApiAxiosInstance);
     const { movie, episodes } = movieDetail || {};
 
     if (!movie || !episodes) {
-      return { link_video: null, tap_phim: null, movie_data: null };
+      return { link_video: null, actual_ngon_ngu_type: null };
     }
 
     const targetEpisodeIdentifier =
@@ -124,7 +128,7 @@ export const fetchPhimApiEpisode = async (slug, so_tap, ngon_ngu) => {
     }
 
     if (targetServerData.length === 0) {
-      return { link_video: null, tap_phim: null, movie_data: null };
+      return { link_video: null, actual_ngon_ngu_type: null };
     }
 
     const foundEpisode = targetServerData.find((item) => {
@@ -141,13 +145,11 @@ export const fetchPhimApiEpisode = async (slug, so_tap, ngon_ngu) => {
     });
 
     if (!foundEpisode) {
-      return { link_video: null, tap_phim: null, movie_data: null };
+      return { link_video: null, actual_ngon_ngu_type: null };
     }
 
     return {
       link_video: foundEpisode.link_m3u8 || foundEpisode.link_embed,
-      tap_phim: { phim: movie },
-      movie_data: movieDetail,
       actual_ngon_ngu_type: typeFound,
     };
   } catch (error) {
@@ -155,17 +157,19 @@ export const fetchPhimApiEpisode = async (slug, so_tap, ngon_ngu) => {
       `Error fetching phimapi episode ${slug}-${so_tap}-${ngon_ngu}:`,
       error
     );
-    return { link_video: null, tap_phim: null, movie_data: null };
+    return { link_video: null, actual_ngon_ngu_type: null };
   }
 };
 
+// ** Modified fetchOphim1EpisodeEmbed to NOT return movie_data.
+// It will only return the link_video and actual_ngon_ngu_type**
 export const fetchOphim1EpisodeEmbed = async (slug, so_tap, ngon_ngu) => {
   try {
     const movieDetail = await fetchJson(`/phim/${slug}`, ophim1AxiosInstance);
     const { movie, episodes } = movieDetail || {};
 
     if (!movie || !episodes) {
-      return { link_video: null, tap_phim: null, movie_data: null };
+      return { link_video: null, actual_ngon_ngu_type: null };
     }
 
     const targetEpisodeIdentifier =
@@ -201,7 +205,7 @@ export const fetchOphim1EpisodeEmbed = async (slug, so_tap, ngon_ngu) => {
     }
 
     if (targetServerData.length === 0) {
-      return { link_video: null, tap_phim: null, movie_data: null };
+      return { link_video: null, actual_ngon_ngu_type: null };
     }
 
     const foundEpisode = targetServerData.find((item) => {
@@ -218,20 +222,20 @@ export const fetchOphim1EpisodeEmbed = async (slug, so_tap, ngon_ngu) => {
     });
 
     if (!foundEpisode) {
-      return { link_video: null, tap_phim: null, movie_data: null };
+      return { link_video: null, actual_ngon_ngu_type: null };
     }
 
     return {
       link_video: foundEpisode.link_m3u8 || foundEpisode.link_embed,
-      tap_phim: { phim: movie },
-      movie_data: movieDetail,
       actual_ngon_ngu_type: typeFound,
     };
   } catch (error) {
-    return { link_video: null, tap_phim: null, movie_data: null };
+    return { link_video: null, actual_ngon_ngu_type: null };
   }
 };
 
+// ** Modified fetchNguoncEpisodeEmbed to NOT return movie_data.
+// It will only return the link_video and actual_ngon_ngu_type**
 export const fetchNguoncEpisodeEmbed = async (movieSlug, episodeNum, lang) => {
   const NGUONC_API_BASE = "https://phim.nguonc.com/api/film";
   const movieDetailUrl = `${NGUONC_API_BASE}/${movieSlug}`;
@@ -254,7 +258,7 @@ export const fetchNguoncEpisodeEmbed = async (movieSlug, episodeNum, lang) => {
     }
 
     if (data.status !== "success" || !data.movie) {
-      return null;
+      return { link_video: null, actual_ngon_ngu_type: null };
     }
 
     const movie = data.movie;
@@ -289,7 +293,7 @@ export const fetchNguoncEpisodeEmbed = async (movieSlug, episodeNum, lang) => {
     }
 
     if (targetServerDataItems.length === 0) {
-      return null;
+      return { link_video: null, actual_ngon_ngu_type: null };
     }
 
     const foundEpisode = targetServerDataItems.find(
@@ -299,25 +303,25 @@ export const fetchNguoncEpisodeEmbed = async (movieSlug, episodeNum, lang) => {
     );
 
     if (!foundEpisode) {
-      return null;
+      return { link_video: null, actual_ngon_ngu_type: null };
     }
 
     return {
       link_video: foundEpisode.embed,
-      tap_phim: { phim: movie },
       actual_ngon_ngu_type: typeFound,
     };
   } catch (error) {
     console.error("Error fetching Nguonc data:", error);
-    return null;
+    return { link_video: null, actual_ngon_ngu_type: null };
   }
 };
 
+// ** fetchAllMovieData remains largely the same, but it's now the primary source for movie info. **
 export const fetchAllMovieData = async (slug) => {
   try {
     const [phimApiResult, homeDataResult] = await Promise.allSettled([
       fetchJson(`/phim/${slug}`, phimApiAxiosInstance),
-      fetchHomeData(),
+      fetchHomeData(), // assuming fetchHomeData is independent of movie slug
     ]);
 
     let movieDetailFromPhimApi = {};
@@ -368,35 +372,23 @@ export const fetchAllMovieData = async (slug) => {
       topData = homeDataResult.value.topData || [];
     }
 
+    // Return the consolidated movie data from PhimAPI and episode lists
     return {
-      vietsubData: {
-        movie: movieDetailFromPhimApi,
-        episodes: [{ server_name: "Vietsub", server_data: vietsubEpisodes }],
-      },
-      thuyetminhData: {
-        movie: movieDetailFromPhimApi,
-        episodes: [
-          { server_name: "Thuyết Minh", server_data: thuyetminhEpisodes },
-        ],
-      },
-      longtiengData: {
-        movie: movieDetailFromPhimApi,
-        episodes: [
-          { server_name: "Lồng Tiếng", server_data: longtiengEpisodes },
-        ],
-      },
+      movieData: movieDetailFromPhimApi, // This is the single source of movie metadata
+      vietsubEpisodes,
+      thuyetminhEpisodes,
+      longtiengEpisodes,
       topData,
-      deXuatData: [],
       total_episodes: totalEpisodes,
     };
   } catch (error) {
     console.error(`Error fetching all movie data for ${slug}:`, error);
     return {
-      vietsubData: { movie: {}, episodes: [] },
-      thuyetminhData: { movie: {}, episodes: [] },
-      longtiengData: { movie: {}, episodes: [] },
+      movieData: {}, // Ensure this is always returned even on error
+      vietsubEpisodes: [],
+      thuyetminhEpisodes: [],
+      longtiengEpisodes: [],
       topData: [],
-      deXuatData: [],
       total_episodes: 0,
     };
   }
@@ -438,7 +430,7 @@ export const capitalizeWords = (str) =>
         .join(" ")
     : "";
 
-const CANONICAL_APP_BASE_URL = "https://motchillw.live";
+const CANONICAL_APP_BASE_URL = "https://motphims.live";
 
 export const generateSeoData = (
   tenPhim,
@@ -468,8 +460,8 @@ export const generateSeoData = (
       : "";
   const so_tapFormatted = capitalizeWords(so_tap || "");
 
-  const titleTag = `Xem Phim ${tenPhimFormatted} Tập ${so_tapFormatted} ${ngonNguLabel} HD - Motchill`;
-  const seoDescription = `Xem ${tenPhimFormatted} - Tập ${so_tapFormatted} (${ngonNguLabel}) chất lượng cao. Thưởng thức phim nhanh, không quảng cáo, hỗ trợ đa nền tảng tại Motchill.`;
+  const titleTag = `Xem Phim ${tenPhimFormatted} Tập ${so_tapFormatted} ${ngonNguLabel} HD - Motphim`;
+  const seoDescription = `Xem ${tenPhimFormatted} - Tập ${so_tapFormatted} (${ngonNguLabel}) chất lượng cao. Thưởng thức phim nhanh, không quảng cáo, hỗ trợ đa nền tảng tại Motphim.`;
 
   const episodeJsonLd = {
     "@context": "https://schema.org",
