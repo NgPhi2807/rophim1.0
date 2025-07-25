@@ -44,7 +44,7 @@ const Footer = () => {
         </nav>
         <div className="mb-4 text-sm leading-relaxed">
           <p>
-            PhimMoi - Trang xem phim online chất lượng cao miễn phí Vietsub,
+            MotPhim - Trang xem phim online chất lượng cao miễn phí Vietsub,
             thuyết minh, lồng tiếng full HD. Kho phim mới không lỗi, phim chiếu
             rạp, phim bộ, phim lẻ từ nhiều quốc gia như Việt Nam, Hàn Quốc,
             Trung Quốc, Thái Lan, Nhật Bản, Âu Mỹ,... đa dạng thể loại. Khám phá
@@ -53,7 +53,7 @@ const Footer = () => {
         </div>
 
         <div className="text-sm">
-          <p>© 2025 PhimMoi</p>
+          <p>© 2025 MotPhim</p>
         </div>
       </div>
     </footer>
