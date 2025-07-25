@@ -152,7 +152,6 @@ const seoJsonLD = {
         <div class="-mx-4 lg:-mx-8 mb-6">
           <HeroSection movies={moviehots} client:load />
         </div>
-
         <div class="pb-6 flex flex-col gap-4 lg:gap-6">
           <CardRow1
             movies={moviechinas}
@@ -180,18 +179,18 @@ const seoJsonLD = {
 
         <CardColum
           movies={movieupchieuraps}
-          client:visible
+          client:load
           title="Bắc Rạp Xem Phim Nào !!"
         />
         <CardColum2
           movies={moviecotrangs}
-          client:visible
+          client:load
           title="Phim Cổ Trang Hot Nhất 2025 ! 🔥"
         />
 
         <CardColum
           movies={moviehoathinhs}
-          client:visible
+          client:load
           title="Đỉnh Cao DongHua Chỉ Có Trên PhimMoi ! 🔥"
         />
         <div class="py-6 flex justify-center">
@@ -202,7 +201,6 @@ const seoJsonLD = {
           client:visible
           title="Phim Thái Lan Hot"
         />
-
         <CardRow movies={movieles} client:visible title="Phim Lẻ Mới " />
         <CardRow movies={moviebos} client:visible title="Phim Bộ Mới " />
         <div class="py-6 flex justify-center">
@@ -210,11 +208,6 @@ const seoJsonLD = {
         </div>
         <AnimeList movies={moviehhs} client:visible title="Kho Anime Xịn Xò " />
       </div>
-
-      <!-- <div class="w-full flex flex-col lg:flex-[3] gap-4">
-        <Progress client:load />
-        <TopMovies movies={todayMovies} client:visible />
-      </div> -->
     </main>
   </div>
 </Layout>

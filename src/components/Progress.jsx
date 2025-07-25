@@ -144,7 +144,7 @@ const WatchedMovies = ({ onMovieSelect = null }) => {
       <h2 className="text-lg font-bold text-white">Phim Xem Gần Đây</h2>
 
       <div className="relative mt-2">
-        <div className="grid grid-cols-2 gap-2 ">
+        <div className="grid grid-cols-6 gap-2 ">
           {watchedMovies.map((movie) => {
             const progressPercentage = getProgressPercentage(
               movie.progress,
