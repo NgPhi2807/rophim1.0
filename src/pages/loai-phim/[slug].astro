@@ -65,10 +65,10 @@ const slugToDisplayName: Record<string, string> = {
 
 const currentCategoryName =
   slugToDisplayName[slug] || categoryData.titlePage || slug; // Prefer mapped name, then API title, then slug itself
-const siteUrl = "https://motphims.live";
+const siteUrl = "https://phimmoii.top";
 const currentUrl = `${siteUrl}/loai-phim/${slug}`;
-const titleTag = `${currentCategoryName} Mới Nhất | Motphim | Xem Phim Online Miễn Phí | Phim Mới HD`;
-const seoDescription = `Khám phá kho ${currentCategoryName.toLowerCase()} mới nhất tại Motphim, hơn 10.000+ phim được chọn lọc với phụ đề Vietsub, thuyết minh, chất lượng FullHD. Xem phim online miễn phí, cập nhật liên tục!`;
+const titleTag = `${currentCategoryName} Mới Nhất | Phimmoi | Xem Phim Online Miễn Phí | Phim Mới HD`;
+const seoDescription = `Khám phá kho ${currentCategoryName.toLowerCase()} mới nhất tại Phimmoi, hơn 10.000+ phim được chọn lọc với phụ đề Vietsub, thuyết minh, chất lượng FullHD. Xem phim online miễn phí, cập nhật liên tục!`;
 const ogImage = categoryData?.items?.[0]?.thumb_url || `${siteUrl}/logo.png`;
 
 // Consolidated Schema.org data

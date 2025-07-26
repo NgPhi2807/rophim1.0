@@ -9,7 +9,7 @@ const page = parseInt(Astro.url.searchParams.get("page") || "1");
 const BASE_URL = "https://phimapi.com";
 const TOP_URL = `${BASE_URL}/v1/api/danh-sach/phim-bo?page=1&sort_field=_id&sort_type=dsc&limit=10`;
 
-const siteUrl = "https://motphims.live";
+const siteUrl = "https://phimmoii.top";
 
 const fetchJson = async (url: string) => {
   try {
@@ -28,8 +28,8 @@ const pageTitle = keyword
   : `Tìm kiếm phim - Trang ${page}`;
 
 const pageDescription = keyword
-  ? `Kết quả tìm kiếm phim cho từ khóa "${keyword}" trên Motphim. Duyệt qua hàng ngàn bộ phim và chương trình truyền hình.`
-  : `Trang tìm kiếm phim của Motphim. Khám phá các bộ phim và chương trình truyền hình yêu thích của bạn.`;
+  ? `Kết quả tìm kiếm phim cho từ khóa "${keyword}" trên Phimmoi. Duyệt qua hàng ngàn bộ phim và chương trình truyền hình.`
+  : `Trang tìm kiếm phim của Phimmoi. Khám phá các bộ phim và chương trình truyền hình yêu thích của bạn.`;
 
 const canonicalUrl = new URL(
   `/tim-kiem?q=${encodeURIComponent(keyword)}&page=${page}`,

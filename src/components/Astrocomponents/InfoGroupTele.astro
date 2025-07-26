@@ -1,33 +1,24 @@
 ---
-import bgImage from "../../assets/box1.jpg";
+import bgImage from "../../assets/box-1.jpg";
 ---
 
-<div class="relative z-10 overflow-hidden rounded-[4px] shadow-lg py-2">
+<div class="relative z-10 overflow-hidden rounded-[4px] shadow-lg mb-4">
+  {/* Background */}
   <div
     class="absolute inset-0 -z-10 bg-cover bg-center"
     style={`background-image: url('${bgImage.src}');`}
   >
   </div>
 
+  {/* Overlay màu tối */}
+  <div class="absolute inset-0 -z-10 bg-black/20"></div>
+
   <div class="w-full overflow-hidden">
     <h1
-      class="text-gray-200 font-bold text-sm px-4 text-center whitespace-normal md:whitespace-nowrap md:animate-scroll"
+      class="text-black font-semibold font-segoe text-sm lg:text-lg px-4 py-2 text-center whitespace-normal md:whitespace-nowrap md:animate-scroll"
     >
-      🌟 Chào mừng bạn đến với
-      <a
-        href="#"
-        class="underline
-        text-green-100
-        hover:text-white
-        mx-1"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Motchill
-      </a>
-      - Xem phim không quảng cáo - Full HD - Cập nhật mỗi ngày !!!
+      Chào mừng bạn đến với PhimMoiChill - Xem phim không quảng cáo - Full HD -
+      Cập nhật mỗi ngày !!!
     </h1>
   </div>
 </div>
-
-<!-- href="https://t.me/+FNo8VjAgkrk1ZDI1" -->

@@ -430,7 +430,7 @@ export const capitalizeWords = (str) =>
         .join(" ")
     : "";
 
-const CANONICAL_APP_BASE_URL = "https://motphims.live";
+const CANONICAL_APP_BASE_URL = "https://phimmoii.top";
 
 export const generateSeoData = (
   tenPhim,
@@ -460,8 +460,8 @@ export const generateSeoData = (
       : "";
   const so_tapFormatted = capitalizeWords(so_tap || "");
 
-  const titleTag = `Xem Phim ${tenPhimFormatted} Tập ${so_tapFormatted} ${ngonNguLabel} HD - Motphim`;
-  const seoDescription = `Xem ${tenPhimFormatted} - Tập ${so_tapFormatted} (${ngonNguLabel}) chất lượng cao. Thưởng thức phim nhanh, không quảng cáo, hỗ trợ đa nền tảng tại Motphim.`;
+  const titleTag = `Xem Phim ${tenPhimFormatted} Tập ${so_tapFormatted} ${ngonNguLabel} HD - Phimmoi`;
+  const seoDescription = `Xem ${tenPhimFormatted} - Tập ${so_tapFormatted} (${ngonNguLabel}) chất lượng cao. Thưởng thức phim nhanh, không quảng cáo, hỗ trợ đa nền tảng tại Phimmoi.`;
 
   const episodeJsonLd = {
     "@context": "https://schema.org",

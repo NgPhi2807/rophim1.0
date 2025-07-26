@@ -120,10 +120,10 @@ const countryNames: { [key: string]: string } = {
 };
 
 const currentCategoryName = countryNames[slug] || "Phim Theo Quốc Gia";
-const siteUrl = "https://motphims.live";
+const siteUrl = "https://phimmoii.top";
 const currentUrl = `${siteUrl}/quoc-gia/${slug}`;
-const titleTag = `${currentCategoryName} Mới Nhất 2025 | Xem ${currentCategoryName} Online Vietsub Tại Motphim`;
-const seoDescription = `Xem ${currentCategoryName.toLowerCase()} online chất lượng cao, Vietsub miễn phí tại Motphim. Nội dung hấp dẫn, cập nhật liên tục không quảng cáo.`;
+const titleTag = `${currentCategoryName} Mới Nhất 2025 | Xem ${currentCategoryName} Online Vietsub Tại Phimmoi`;
+const seoDescription = `Xem ${currentCategoryName.toLowerCase()} online chất lượng cao, Vietsub miễn phí tại Phimmoi. Nội dung hấp dẫn, cập nhật liên tục không quảng cáo.`;
 const ogImage = categoryData?.items?.[0]?.thumb_url || `${siteUrl}/logo.png`;
 
 // Consolidated Schema.org data
@@ -179,8 +179,8 @@ const schemaData = {
       "@type": "WebSite",
       "@id": `${siteUrl}#website`,
       url: siteUrl,
-      name: "Motphim",
-      description: "Xem Phim Vietsub HD tại Motphim",
+      name: "Phimmoi",
+      description: "Xem Phim Vietsub HD tại Phimmoi",
       publisher: {
         "@id": `${siteUrl}#organization`,
       },
@@ -194,14 +194,14 @@ const schemaData = {
     {
       "@type": "Organization",
       "@id": `${siteUrl}#organization`,
-      name: "Motphim",
+      name: "Phimmoi",
       url: siteUrl,
       logo: {
         "@type": "ImageObject",
         "@id": `${siteUrl}#/schema/logo/image/`,
         url: `${siteUrl}/logo.png`,
         contentUrl: `${siteUrl}/logo.png`,
-        caption: "Motphim",
+        caption: "Phimmoi",
         inLanguage: "vi",
       },
     },
@@ -222,7 +222,7 @@ const schemaData = {
     <meta property="og:url" content={currentUrl} />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="vi_VN" />
-    <meta property="og:site_name" content="Motphim" />
+    <meta property="og:site_name" content="Phimmoi" />
     <meta property="og:image" content={ogImage} />
 
     {/* Twitter Card Tags */}

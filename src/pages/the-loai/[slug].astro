@@ -66,16 +66,15 @@ const capitalizedCategoryName = currentCategoryName
   .join(" ");
 
 if (!categoryData) {
-  // Only check categoryData for a 500 response, topmovies can be empty
   return new Response("Không thể lấy dữ liệu thể loại. Vui lòng thử lại sau.", {
     status: 500,
   });
 }
 
-const siteUrl = "https://motphims.live";
+const siteUrl = "https://phimmoii.top";
 const currentUrl = `${siteUrl}/the-loai/${slug}`;
-const titleTag = `Phim ${currentCategoryName} Mới Nhất | Tuyển Tập Phim Hay 2025 | Motphim`;
-const seoDescription = `Xem phim ${capitalizedCategoryName} tại Motphim Vietsub HD miễn phí, chất lượng hình ảnh đỉnh cao. Cập nhật nhanh nhất những bộ phim hấp dẫn, đảm bảo trải nghiệm xem phim tuyệt vời!`;
+const titleTag = `Phim ${currentCategoryName} Mới Nhất | Tuyển Tập Phim Hay 2025 | Phimmoi`;
+const seoDescription = `Xem phim ${capitalizedCategoryName} tại Phimmoi Vietsub HD miễn phí, chất lượng hình ảnh đỉnh cao. Cập nhật nhanh nhất những bộ phim hấp dẫn, đảm bảo trải nghiệm xem phim tuyệt vời!`;
 const ogImage = categoryData?.items?.[0]?.thumb_url || `${siteUrl}/logo.png`;
 
 // Consolidated Schema.org data
@@ -131,8 +130,8 @@ const schemaData = {
       "@type": "WebSite",
       "@id": `${siteUrl}#website`,
       url: siteUrl,
-      name: "Motphim",
-      description: "Xem Phim Vietsub HD tại Motphim",
+      name: "Phimmoi",
+      description: "Xem Phim Vietsub HD tại Phimmoi",
       publisher: {
         "@id": `${siteUrl}#organization`,
       },
@@ -146,14 +145,14 @@ const schemaData = {
     {
       "@type": "Organization",
       "@id": `${siteUrl}#organization`,
-      name: "Motphim",
+      name: "Phimmoi",
       url: siteUrl,
       logo: {
         "@type": "ImageObject",
         "@id": `${siteUrl}#/schema/logo/image/`,
         url: `${siteUrl}/logo.png`,
         contentUrl: `${siteUrl}/logo.png`,
-        caption: "Motphim",
+        caption: "Phimmoi",
         inLanguage: "vi",
       },
     },
@@ -174,7 +173,7 @@ const schemaData = {
     <meta property="og:url" content={currentUrl} />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="vi_VN" />
-    <meta property="og:site_name" content="Motphim" />
+    <meta property="og:site_name" content="Phimmoi" />
     <meta property="og:image" content={ogImage} />
 
     {/* Twitter Card Tags */}

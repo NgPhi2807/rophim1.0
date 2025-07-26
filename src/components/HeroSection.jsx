@@ -15,7 +15,7 @@ function convertImageUrlToProxy(url) {
   if (index === -1) return "";
 
   const path = url.slice(index + "/upload/".length);
-  return `https://ik.imagekit.io/17mpki7mv/motchill/upload/${path}?tr=w-1000,h-450,f-webp,fo-auto,q-80`;
+  return `https://ik.imagekit.io/17mpki7mv/motchill/upload/${path}?tr=w-1200,h-450,f-webp,fo-auto`;
 }
 
 const gradientMaskStyle = {
@@ -42,6 +42,8 @@ export default function MovieCard({ movies: initialMovies = [] }) {
   const [allMovies, setAllMovies] = useState([]);
   const [currentMovieIndex, setCurrentMovieIndex] = useState(0);
   const [dotsCount, setDotsCount] = useState(0);
+  // New state to track animation direction: 1 for forward (right), -1 for backward (left)
+  const [animationDirection, setAnimationDirection] = useState(1);
   const isLg = useMediaQuery({ minWidth: 1024 });
 
   const touchStartX = useRef(0);
@@ -84,8 +86,10 @@ export default function MovieCard({ movies: initialMovies = [] }) {
   const scroll = useCallback(
     (direction) => {
       if (direction === "left") {
+        setAnimationDirection(-1); // Set direction for left animation
         setCurrentMovieIndex((prevIndex) => Math.max(0, prevIndex - 1));
       } else {
+        setAnimationDirection(1); // Set direction for right animation
         setCurrentMovieIndex((prevIndex) =>
           Math.min(allMovies.length - 1, prevIndex + 1)
         );
@@ -105,10 +109,12 @@ export default function MovieCard({ movies: initialMovies = [] }) {
   const handleTouchEnd = useCallback(() => {
     const swipeDistance = touchStartX.current - touchEndX.current;
     if (swipeDistance > 75) {
+      setAnimationDirection(1); // Swipe left, next movie comes from right
       setCurrentMovieIndex((prevIndex) =>
         Math.min(allMovies.length - 1, prevIndex + 1)
       );
     } else if (swipeDistance < -75) {
+      setAnimationDirection(-1); // Swipe right, next movie comes from left
       setCurrentMovieIndex((prevIndex) => Math.max(0, prevIndex - 1));
     }
     touchStartX.current = 0;
@@ -167,9 +173,10 @@ export default function MovieCard({ movies: initialMovies = [] }) {
                   width="800"
                   height="450"
                   style={gradientMaskStyle}
-                  initial={{ opacity: 0, x: 100 }}
+                  // Dynamically set initial and exit x based on animationDirection
+                  initial={{ opacity: 0, x: animationDirection * 100 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -100 }}
+                  exit={{ opacity: 0, x: animationDirection * -100 }}
                   transition={{ duration: 0.3 }}
                 />
               </AnimatePresence>
@@ -196,13 +203,17 @@ export default function MovieCard({ movies: initialMovies = [] }) {
                       aria-label={`Slide ${dotIndex + 1}`}
                       onClick={(e) => {
                         e.preventDefault(); // Ngăn chặn hành vi mặc định của thẻ 'a'
+                        // Determine direction based on current and clicked index
+                        setAnimationDirection(
+                          dotIndex > currentMovieIndex ? 1 : -1
+                        );
                         setCurrentMovieIndex(dotIndex);
                       }}
                     />
                   ))}
                 </div>
               )}
-            </div>{" "}
+            </div>
             <div className="absolute bottom-5 lg:bottom-20 left-4 flex flex-col gap-1 lg:gap-3 text-white z-20 lg:left-16 drop-shadow-[0_20px_20px_rgba(0,0,0,10)]">
               <h2
                 className="line-clamp-1 text-lg lg:text-3xl font-bold "
@@ -268,7 +279,7 @@ export default function MovieCard({ movies: initialMovies = [] }) {
                 </div>
 
                 <div
-                  className="border border-white lg:px-2 px-1 py-0.5 lg:py-1  rounded-md"
+                  className="border border-white lg:px-2 px-1 py-0.5 lg:py-1 rounded-md"
                   aria-label={`Thời lượng phim: ${currentMovie.time}`}
                 >
                   {currentMovie.time}

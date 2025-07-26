@@ -34,8 +34,8 @@ export default function MovieActions({
 
   const handleShare = () => {
     const shareData = {
-      title: `${movieName} | MotChill`,
-      text: "Khám phá phim hấp dẫn mỗi ngày trên motphimv1.com",
+      title: `${movieName} | PhimMoi`,
+      text: "Khám phá phim hấp dẫn mỗi ngày trên phimmoii.top",
       url: window.location.href,
     };
 
@@ -75,13 +75,13 @@ export default function MovieActions({
       <div className="hidden lg:flex mt-3 flex-row gap-8 items-center justify-center ">
         <a
           href={hrefXemNgay}
-          className="flex items-center justify-center gap-2 rounded-full bg-gradient-to-br from-[#FECF59] to-[#FFF1CC] px-8 py-4 text-base font-semibold text-gray-900 transition-all duration-200 shadow-lg hover:shadow-[0_4px_20px_rgba(255,222,128,1)]"
+          className="flex items-center justify-center gap-4 rounded-full bg-gradient-to-br from-[#FECF59] to-[#FFF1CC] px-8 py-4 text-base font-medium text-gray-900 transition-all duration-200 shadow-lg hover:shadow-[0_4px_20px_rgba(255,222,128,1)]"
           aria-label="Xem phim ngay"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="14"
-            height="14"
+            width="20"
+            height="20"
             viewBox="0 0 24 24"
             fill="currentColor"
           >
