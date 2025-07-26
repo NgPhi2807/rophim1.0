@@ -1,11 +1,11 @@
 import { defineConfig } from "astro/config";
 import tailwind from "@astrojs/tailwind";
 import react from "@astrojs/react";
-import vercel from "@astrojs/vercel/serverless"; // dùng bản serverless
+import vercel from "@astrojs/vercel"; // <-- CHỈ DÙNG DÒNG NÀY
 import compress from "astro-compress";
 
 export default defineConfig({
-  output: "server",
+  output: "server", // hoặc "hybrid", tùy app bạn có dùng SSR không
   adapter: vercel(),
 
   integrations: [

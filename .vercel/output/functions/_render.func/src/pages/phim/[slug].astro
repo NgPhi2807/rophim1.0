@@ -1,0 +1,354 @@
+---
+export const prerender = false;
+
+import BaseLayout from "../../layouts/Layout.astro";
+import Header from "../../components/Header";
+import MovieDetailWrapper from "../../components/MovieDetail/MovieDetail";
+import MovieDetailStaticInfo from "../../components/MovieDetail/MovieDetailStaticInfo.astro";
+import MobileMovieInfoToggle from "../../components/MovieDetail/MovieToggle";
+import TopMovies from "../../components/TodayMovies";
+import Episodes from "../../components/Episode";
+import { getMoviePageData } from "../../utils/getMovieDetail";
+import CommentBox from "../../components/Comment/Comments";
+import MovieActions from "../../components/MovieDetail/MovieAction";
+
+// Utility function to capitalize words
+const capitalizeWords = (str: string) => {
+  if (!str) return "";
+  return str
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
+
+const stripHtml = (html: string) => html?.replace(/<[^>]*>?/gm, "") || "";
+
+const getOptimizedImageUrl = (url: string, width?: number, height?: number) => {
+  if (!url) return "";
+  const index = url.indexOf("/upload/");
+  if (index === -1) return "";
+  const path = url.slice(index + "/upload/".length);
+  let transformParams = "f-webp,fo-auto,q-85";
+  if (width) transformParams += `,w-${width}`;
+  if (height) transformParams += `,h-${height}`;
+  return `https://ik.imagekit.io/17mpki7mv/motchill/upload/${path}?tr=${transformParams}`;
+};
+
+const { slug } = Astro.params;
+const siteUrl = "https://phimmoii.top";
+const canonicalUrl = `${siteUrl}/phim/${slug}`;
+const movieCommentIdentifier = `phim/${slug}`;
+
+let movieDetail = null;
+let vietsubEpisodes: any[] = [];
+let thuyetMinhEpisodes: any[] = [];
+let longTiengEpisodes: any[] = [];
+let topmovies: any[] = [];
+let dexuatmovies: any[] = [];
+let firstEpisodeLink: string | null = null;
+let firstEpisodeSlug: string | null = null;
+let firstEpisodeType: string | null = null;
+
+try {
+  const moviePageData = await getMoviePageData(slug);
+  if (moviePageData) {
+    movieDetail = moviePageData.movieInfo;
+    vietsubEpisodes = moviePageData.vietsub || [];
+    thuyetMinhEpisodes = moviePageData.thuyetminh || [];
+    longTiengEpisodes = moviePageData.longtieng || [];
+    topmovies = moviePageData.topmovies || [];
+    dexuatmovies = moviePageData.dexuatmovies || [];
+    firstEpisodeLink = moviePageData.firstEpisode || null;
+    firstEpisodeSlug = moviePageData.firstEpisodeSlug || null;
+    firstEpisodeType = moviePageData.firstEpisodeType || null;
+  }
+} catch (error) {
+  console.error(`Error fetching movie data for slug "${slug}":`, error);
+}
+
+if (!movieDetail) {
+  return new Response(null, {
+    status: 404,
+    statusText: "Not Found",
+  });
+}
+
+const movieTitleFormatted = capitalizeWords(movieDetail.name);
+const movieOriginalName = capitalizeWords(movieDetail.origin_name);
+const cleanContent = stripHtml(movieDetail.content);
+const shortContent =
+  cleanContent.length > 160
+    ? cleanContent.slice(0, 157) + "[...]"
+    : cleanContent;
+
+const randomRating = (Math.random() * 0.5 + 9).toFixed(1);
+const randomCount = Math.floor(Math.random() * 2000 + 1000);
+
+const genreList = Array.isArray(movieDetail.category)
+  ? movieDetail.category.map((g: { name: string }) => g.name)
+  : [];
+const actorList = Array.isArray(movieDetail.actor)
+  ? movieDetail.actor.map((name: string) => ({
+      "@type": "Person",
+      name: name.trim(),
+    }))
+  : [];
+const directorSchema =
+  Array.isArray(movieDetail.director) && movieDetail.director.length > 0
+    ? { "@type": "Person", name: movieDetail.director[0] }
+    : undefined;
+
+const datePublishedSchema = movieDetail.year ? `${movieDetail.year}-01-01` : "";
+const ratingValue = movieDetail.tmdb?.vote_average?.toString() || randomRating;
+const ratingCount =
+  movieDetail.tmdb?.vote_count?.toString() || randomCount.toString();
+
+const posterUrlProxy = getOptimizedImageUrl(movieDetail.poster_url);
+const thumbUrlProxy = getOptimizedImageUrl(movieDetail.thumb_url);
+const posterSmallUrlProxy = getOptimizedImageUrl(
+  movieDetail.poster_url,
+  300,
+  450
+);
+
+const seoTitle = `Xem Phim ${movieTitleFormatted} - Full HD - ${movieOriginalName} - Phimmoi`;
+const seoDescription = `Phim ${movieTitleFormatted} - ${shortContent}`;
+const ogImageContent = getOptimizedImageUrl(movieDetail.poster_url);
+
+const schemaOrgData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Movie",
+      name: movieTitleFormatted,
+      description:
+        movieDetail.content || "Xem phim online Vietsub miễn phí tại Phimmoi.",
+      image: posterUrlProxy,
+      url: canonicalUrl,
+      datePublished: datePublishedSchema,
+      genre: genreList,
+      director: directorSchema,
+      actor: actorList,
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: ratingValue,
+        bestRating: "10",
+        worstRating: "1",
+        ratingCount: ratingCount,
+      },
+      potentialAction: {
+        "@type": "WatchAction",
+        target: [
+          {
+            "@type": "EntryPoint",
+            urlTemplate: canonicalUrl,
+            actionPlatform: [
+              "http://schema.org/DesktopWebPlatform",
+              "http://schema.org/MobileWebPlatform",
+              "http://schema.org/TabletWebPlatform",
+            ],
+          },
+        ],
+      },
+    },
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Trang chủ",
+          item: siteUrl,
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Phim",
+          item: `${siteUrl}/phim`,
+        },
+        {
+          "@type": "ListItem",
+          position: 3,
+          name: movieTitleFormatted,
+          item: canonicalUrl,
+        },
+      ],
+    },
+    {
+      "@type": "WebPage",
+      name: `${movieTitleFormatted} - Phimmoi`,
+      url: canonicalUrl,
+      description:
+        movieDetail.content || "Xem phim Vietsub miễn phí tại Phimmoi.",
+    },
+  ],
+};
+
+const gradientMaskStyle = {
+  maskImage: `
+    linear-gradient(to bottom, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 90%),
+    linear-gradient(to top, rgba(0,0,0,1) 90%, rgba(0,0,0,0) 100%),
+    linear-gradient(to right, rgba(0,0,0,1) 80%, rgba(0,0,0,0) 100%),
+    linear-gradient(to left, rgba(0,0,0,1) 80%, rgba(0,0,0,0) 100%)
+  `,
+  maskComposite: "intersect",
+  WebkitMaskRepeat: "no-repeat",
+  maskRepeat: "no-repeat",
+};
+---
+
+<BaseLayout>
+  <Fragment slot="head">
+    <title>{seoTitle}</title>
+    <meta name="description" content={seoDescription} />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta name="robots" content="index, follow" />
+
+    <meta property="og:title" content={seoTitle} />
+    <meta
+      property="og:description"
+      content={movieDetail.content || seoDescription}
+    />
+    <meta property="og:image" content={ogImageContent} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:type" content="video.movie" />
+    <meta property="og:locale" content="vi_VN" />
+    <meta property="og:site_name" content="Phimmoi" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={seoTitle} />
+    <meta
+      name="twitter:description"
+      content={movieDetail.content || seoDescription}
+    />
+    <meta name="twitter:image" content={ogImageContent} />
+
+    <link rel="icon" href="/favicon.ico" />
+
+    {
+      movieDetail.poster_url && (
+        <link
+          rel="preload"
+          as="image"
+          href={posterSmallUrlProxy}
+          imagesrcset={`${posterSmallUrlProxy} 300w`}
+          imagesizes="(max-width: 768px) 100vw, 300px"
+        />
+      )
+    }
+    {
+      movieDetail.thumb_url && (
+        <link
+          rel="preload"
+          as="image"
+          href={thumbUrlProxy}
+          imagesrcset={`${thumbUrlProxy} 800w`}
+          imagesizes="(max-width: 768px) 100vw, 800px"
+        />
+      )
+    }
+
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(schemaOrgData)}
+    />
+  </Fragment>
+
+  <div class="bg-[#191B24] relative">
+    <Header client:load />
+    <div class="relative w-full h-[200px] lg:h-[500px] overflow-hidden">
+      <img
+        src={thumbUrlProxy}
+        alt={`${movieTitleFormatted} thumbnail`}
+        class="absolute inset-0 w-full h-full object-cover filter opacity-50"
+        style={gradientMaskStyle}
+      />
+    </div>
+
+    <div
+      class="hidden md:block absolute inset-0 z-[1] pointer-events-none"
+      style={{
+        backgroundImage: `radial-gradient(rgba(0,0,0,0.1) 0.5px, transparent 0.5px)`,
+        backgroundSize: "3px 3px",
+      }}
+      aria-hidden="true"
+    >
+    </div>
+    <div
+      class="mx-auto lg:px-8 lg:flex lg:pt-40 lg:pb-10 px-4 relative z-20 -mt-[100px] lg:-mt-[250px]"
+    >
+      <div class="relative w-full lg:w-[45%] min-w-0">
+        <div
+          class="hidden lg:block absolute top-0 left-0 right-0 h-[20%] bg-gradient-to-b from-black/10 to-transparent backdrop-blur-sm rounded-t-[2rem] z-10"
+        >
+        </div>
+        <div class="relative flex flex-col w-full bg-transparent z-10">
+          <div class="-mx-4 lg:mx-0 py-2 lg:py-8 px-2">
+            <MovieDetailWrapper
+              movie={movieDetail}
+              firstEpisodeSlug={firstEpisodeSlug}
+              firstEpisodeType={firstEpisodeType}
+              client:visible
+            >
+              <MovieDetailStaticInfo
+                movie={movieDetail}
+                chuyenURLSangProxy={getOptimizedImageUrl}
+                chuyenURLSangProxy1={(url) =>
+                  getOptimizedImageUrl(url, 300, 450)}
+              >
+                {
+                  movieDetail && (
+                    <MovieActions
+                      slot="movie-actions"
+                      movieSlug={movieDetail.slug}
+                      firstEpisodeSlug={firstEpisodeSlug}
+                      firstEpisodeType={firstEpisodeType}
+                      movieName={movieDetail.name}
+                      client:visible
+                    />
+                  )
+                }
+              </MovieDetailStaticInfo>
+              <MobileMovieInfoToggle movie={movieDetail} client:visible />
+            </MovieDetailWrapper>
+          </div>
+          <div class="hidden lg:flex py-4 justify-center">
+            <div class="w-full h-[4px] bg-white rounded-xs"></div>
+          </div>
+          <div class="w-full py-0 lg:py-4 px-4 lg:px-0">
+            <TopMovies movies={topmovies} />
+          </div>
+        </div>
+      </div>
+
+      <div class="relative basis-full lg:w-[55%]">
+        <div
+          class="hidden lg:block pointer-events-none absolute top-0 left-0 right-0 h-[20%] bg-gradient-to-b from-black/20 to-transparent backdrop-blur-sm rounded-t-[2rem] z-10"
+        >
+        </div>
+        <div class="relative z-20 p-0 lg:px-10 lg:py-4">
+          <MovieActions
+            movieSlug={movieDetail.slug}
+            firstEpisodeSlug={firstEpisodeSlug}
+            firstEpisodeType={firstEpisodeType}
+            movieName={movieDetail.name}
+            client:load
+          />
+          <div class="py-10 flex justify-center">
+            <div class="w-[80%] h-[4px] bg-white rounded-xs"></div>
+          </div>
+          <Episodes
+            vietsub={vietsubEpisodes}
+            thuyetminh={thuyetMinhEpisodes}
+            longtieng={longTiengEpisodes}
+            slug={slug}
+            currentType={firstEpisodeType}
+            totalEpisodes={movieDetail.episode_total}
+            client:load
+          />
+          <CommentBox commentIdentifier={movieCommentIdentifier} client:load />
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>

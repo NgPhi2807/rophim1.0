@@ -1,0 +1,269 @@
+---
+// Server-side setup
+export const prerender = false;
+
+import Layout from "../layouts/Layout.astro";
+import HeroSection from "../components/HeroSection";
+import { getHomePageData } from "../utils/getMovieHome";
+import CardColum from "../components/CardColumn";
+import CardColum2 from "../components/CardColumn2";
+import CardRow from "../components/CardRow";
+import CardRow1 from "../components/CardRow1";
+import AnimeList from "../components/AnimeList";
+import Header from "../components/Header";
+import TeleInfo from "../components/Astrocomponents/InfoGroupTele.astro";
+import Progress from "../components/Progress";
+const homepageData = await getHomePageData();
+const chinaGradient =
+  "linear-gradient(235deg, rgb(255, 255, 255) 30%, rgb(103, 65, 150) 130%)";
+
+const koreaGradient =
+  "linear-gradient(235deg, rgb(255, 255, 255) 30%, rgb(247, 161, 11) 130%)";
+const usukGradient =
+  "linear-gradient(235deg, rgb(255, 255, 255) 30%, rgb(255, 0, 153) 130%)";
+const {
+  moviehots = [],
+  moviechinas = [],
+  moviekoreas = [],
+  moviecotrangs = [],
+  moviethailans = [],
+  movieusuks = [],
+  movieles = [],
+  moviebos = [],
+  moviehhs = [],
+  movieupchieuraps = [],
+  moviehoathinhs = [],
+} = homepageData;
+
+const siteUrl = "https://phimmoii.top";
+const pageTitle =
+  "Phim Mới | PhimMoiChill | Xem Phim Nhanh Vietsub HD Mới Nhất";
+const description =
+  "PhimMoi and Chill - Xem phim mới tốc độ cao, giao diện chính thức. Cập nhật phim vietsub mỗi ngày, chất lượng HD/4K đa thể loại, không cần đăng ký!";
+
+const seoJsonLD = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "CollectionPage",
+      "@id": `${siteUrl}/`,
+      url: `${siteUrl}/`,
+      name: pageTitle,
+      isPartOf: { "@id": `${siteUrl}/#website` },
+      about: { "@id": `${siteUrl}/#organization` },
+      description,
+      breadcrumb: { "@id": `${siteUrl}/#breadcrumb` },
+      inLanguage: "vi",
+      dateModified: "2025-07-16",
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": `${siteUrl}/#breadcrumb`,
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Trang chủ",
+          item: `${siteUrl}/`,
+        },
+      ],
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${siteUrl}/#website`,
+      url: `${siteUrl}/`,
+      name: "Phimmoi",
+      description: "Xem phim Vietsub HD tại Phimmoi",
+      publisher: { "@id": `${siteUrl}/#organization` },
+      inLanguage: "vi",
+      potentialAction: {
+        "@type": "SearchAction",
+        target: {
+          "@type": "EntryPoint",
+          urlTemplate: `${siteUrl}/?s={search_term_string}`,
+        },
+        "query-input": {
+          "@type": "PropertyValueSpecification",
+          name: "search_term_string",
+          valueRequired: true,
+        },
+      },
+    },
+    {
+      "@type": "Organization",
+      "@id": `${siteUrl}/#organization`,
+      name: "Phimmoi",
+      url: `${siteUrl}/`,
+      logo: {
+        "@type": "ImageObject",
+        "@id": `${siteUrl}/#logo`,
+        inLanguage: "vi",
+        url: `${siteUrl}/logo.png`,
+        contentUrl: `${siteUrl}/logo.png`,
+        caption: "Phimmoi",
+      },
+      image: { "@id": `${siteUrl}/#logo` },
+    },
+  ],
+};
+---
+
+<Layout>
+  <Fragment slot="head">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Phimmoi" />
+    <meta name="copyright" content="© 2025 Phimmoi" />
+    <link rel="canonical" href={siteUrl} />
+    <meta name="theme-color" content="#1f1f29" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <link rel="alternate" href={siteUrl} hreflang="vi" />
+    <link rel="preconnect" href={siteUrl} crossorigin />
+    <link rel="preload" as="image" href="/logo.png" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={siteUrl} />
+    <meta property="og:site_name" content="Phimmoi" />
+    <meta property="og:image" content={`${siteUrl}/logo.png`} />
+    <meta property="og:image:width" content="600" />
+    <meta property="og:image:height" content="315" />
+    <meta property="og:locale" content="vi_VN" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={`${siteUrl}/logo.png`} />
+    <meta
+      name="twitter:image:alt"
+      content="Phimmoi - Xem Phim Vietsub HD Không Quảng Cáo"
+    />
+
+    <script type="application/ld+json" set:html={JSON.stringify(seoJsonLD)} />
+    <style is:global>
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+
+      #splash-screen {
+        transition:
+          opacity 0.5s ease-out,
+          transform 0.5s ease-out;
+      }
+
+      #splash-screen.fade-scale-out {
+        opacity: 0;
+        transform: scale(1.3);
+      }
+    </style>
+  </Fragment>
+  <div
+    id="splash-screen"
+    class="fixed inset-0 bg-black z-[9999] flex flex-col justify-center items-center opacity-100 scale-100"
+  >
+    <img
+      src="/logo.svg"
+      alt="PhimMoi Logo"
+      class="w-auto h-14 lg:h-24 object-cover"
+    />
+    <p
+      class="text-gray-200 font-semibold text-xl lg:text-4xl text-center mt-4 font-segoe leading-tight"
+    >
+      Chào Mừng Đến Với PhimMoi
+    </p>
+    <p
+      class="hidden sm:block text-gray-200 font-semibold text-4xl text-center mt-4 font-segoe leading-tight"
+    >
+      Xem Phim Miễn Phí Không Quảng Cáo
+    </p>
+  </div>
+  <div class="bg-[#191B24]">
+    <Header client:visible />
+    <main id="main-content" class="px-4 lg:px-8 lg:flex gap-2 lg:gap-10">
+      <div class="w-full lg:flex-[7] flex flex-col min-w-0 gap-0 lg:gap-4">
+        <div class="-mx-4 lg:-mx-8 mb-6">
+          <HeroSection movies={moviehots} client:load />
+        </div>
+        <TeleInfo />
+        <div class="pb-6 flex flex-col gap-4 lg:gap-6">
+          <CardRow1
+            movies={moviechinas}
+            client:load
+            title="Phim Trung Quốc Mới"
+            gradient={chinaGradient}
+          />
+          <CardRow1
+            movies={moviekoreas}
+            client:load
+            title="Phim Hàn Quốc Mới"
+            gradient={koreaGradient}
+          />
+          <CardRow1
+            movies={movieusuks}
+            client:load
+            title="Phim US-UK Mới"
+            gradient={usukGradient}
+          />
+
+          <div class="mt-6 flex justify-center">
+            <div class="w-[60%] h-[4px] bg-white rounded-xs"></div>
+          </div>
+        </div>
+
+        <CardColum
+          movies={movieupchieuraps}
+          client:load
+          title="Bắc Rạp Xem Phim Nào !!"
+        />
+        <CardColum2
+          movies={moviecotrangs}
+          client:load
+          title="Phim Cổ Trang Hot Nhất 2025 ! 🔥"
+        />
+
+        <CardColum
+          movies={moviehoathinhs}
+          client:load
+          title="Đỉnh Cao DongHua Chỉ Có Trên PhimMoi ! 🔥"
+        />
+        <div class="py-6 flex justify-center">
+          <div class="w-[60%] h-[4px] bg-white rounded-xs"></div>
+        </div>
+        <CardColum
+          movies={moviethailans}
+          client:visible
+          title="Phim Thái Lan Hot"
+        />
+        <CardRow movies={movieles} client:visible title="Phim Lẻ Mới " />
+        <CardRow movies={moviebos} client:visible title="Phim Bộ Mới " />
+        <div class="py-6 flex justify-center">
+          <div class="w-[60%] h-[4px] bg-white rounded-xs"></div>
+        </div>
+        <AnimeList movies={moviehhs} client:visible title="Kho Anime Xịn Xò " />
+      </div>
+    </main>
+  </div>
+</Layout>
+<script is:inline>
+  document.addEventListener("DOMContentLoaded", () => {
+    const splashScreen = document.getElementById("splash-screen");
+    if (splashScreen) {
+      const animationDuration = 500;
+      setTimeout(() => {
+        splashScreen.classList.add("fade-scale-out");
+        setTimeout(() => {
+          splashScreen.remove();
+        }, animationDuration);
+      }, 700);
+    }
+  });
+</script>
