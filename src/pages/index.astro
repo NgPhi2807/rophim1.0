@@ -251,19 +251,19 @@ const seoJsonLD = {
         <AnimeList movies={moviehhs} client:visible title="Kho Anime Xịn Xò " />
       </div>
     </main>
-    <script is:inline>
-      document.addEventListener("DOMContentLoaded", () => {
-        const splashScreen = document.getElementById("splash-screen");
-        if (splashScreen) {
-          const animationDuration = 500;
-          setTimeout(() => {
-            splashScreen.classList.add("fade-scale-out");
-            setTimeout(() => {
-              splashScreen.remove();
-            }, animationDuration);
-          }, 700);
-        }
-      });
-    </script>
   </div>
 </Layout>
+<script is:inline>
+  document.addEventListener("DOMContentLoaded", () => {
+    const splashScreen = document.getElementById("splash-screen");
+    if (splashScreen) {
+      const animationDuration = 500;
+      setTimeout(() => {
+        splashScreen.classList.add("fade-scale-out");
+        setTimeout(() => {
+          splashScreen.remove();
+        }, animationDuration);
+      }, 700);
+    }
+  });
+</script>
