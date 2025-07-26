@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://motchillw.live/sitemap-index.xml
+Sitemap: https://phimmoii.top/sitemap-index.xml
