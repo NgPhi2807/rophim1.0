@@ -6,6 +6,7 @@ import {
   rutGonTinhTrangNgonNgu,
   rutGonTinhTrangPhim1,
 } from "../utils/movieUtils";
+
 function convertImageUrlToProxy(url) {
   if (!url) {
     return "";
@@ -17,7 +18,6 @@ function convertImageUrlToProxy(url) {
   return `https://ik.imagekit.io/17mpki7mv/motchill/upload/${path}?tr=w-1000,h-450,f-webp,fo-auto,q-80`;
 }
 
-// Style cho mặt nạ gradient
 const gradientMaskStyle = {
   WebkitMaskImage: `
     linear-gradient(to bottom, rgba(0,0,0,1) 100%, rgba(0,0,0,0) 100%),
@@ -35,24 +35,21 @@ const gradientMaskStyle = {
   maskRepeat: "no-repeat",
 };
 
-const GAP_PX = 8;
-const MAX_DOTS = 7; // Giới hạn số chấm chỉ báo
+const MAX_DOTS = 7;
 
 export default function MovieCard({ movies: initialMovies = [] }) {
-  const scrollRef = useRef(null); // Vẫn dùng để tính toán kích thước UI
-  const [allMovies, setAllMovies] = useState([]); // Chứa danh sách phim từ prop
-  const [currentMovieIndex, setCurrentMovieIndex] = useState(0); // Chỉ số của phim đang hiển thị
-  const [dotsCount, setDotsCount] = useState(0); // Số chấm chỉ báo
+  const scrollRef = useRef(null);
+  const [allMovies, setAllMovies] = useState([]);
+  const [currentMovieIndex, setCurrentMovieIndex] = useState(0);
+  const [dotsCount, setDotsCount] = useState(0);
   const isLg = useMediaQuery({ minWidth: 1024 });
 
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
-  // Cập nhật allMovies và currentMovieIndex khi initialMovies từ prop thay đổi
   useEffect(() => {
     if (initialMovies && initialMovies.length > 0) {
       setAllMovies(initialMovies);
-      // Đảm bảo index hiện tại hợp lệ nếu danh sách phim thay đổi (ví dụ: bị rút ngắn)
       setCurrentMovieIndex((prevIndex) =>
         Math.min(prevIndex, initialMovies.length - 1)
       );
@@ -62,10 +59,8 @@ export default function MovieCard({ movies: initialMovies = [] }) {
     }
   }, [initialMovies]);
 
-  // Phim hiện tại được hiển thị
   const currentMovie = allMovies[currentMovieIndex];
 
-  // Logic tính toán số chấm chỉ báo
   const updateDotsCount = useCallback(() => {
     const el = scrollRef.current;
     if (!el || allMovies.length === 0) {
@@ -78,7 +73,6 @@ export default function MovieCard({ movies: initialMovies = [] }) {
     setDotsCount(totalSlides);
   }, [allMovies]);
 
-  // Cập nhật dotsCount khi allMovies thay đổi hoặc khi resize
   useEffect(() => {
     updateDotsCount(); // Chạy lần đầu
     window.addEventListener("resize", updateDotsCount);
@@ -87,7 +81,6 @@ export default function MovieCard({ movies: initialMovies = [] }) {
     };
   }, [updateDotsCount]);
 
-  // Hàm cuộn/chuyển slide (thay đổi currentMovieIndex)
   const scroll = useCallback(
     (direction) => {
       if (direction === "left") {
@@ -101,7 +94,6 @@ export default function MovieCard({ movies: initialMovies = [] }) {
     [allMovies.length]
   );
 
-  // Xử lý vuốt (swipe)
   const handleTouchStart = useCallback((e) => {
     touchStartX.current = e.touches[0].clientX;
   }, []);
@@ -113,20 +105,16 @@ export default function MovieCard({ movies: initialMovies = [] }) {
   const handleTouchEnd = useCallback(() => {
     const swipeDistance = touchStartX.current - touchEndX.current;
     if (swipeDistance > 75) {
-      // Vuốt sang trái (next)
       setCurrentMovieIndex((prevIndex) =>
         Math.min(allMovies.length - 1, prevIndex + 1)
       );
     } else if (swipeDistance < -75) {
-      // Vuốt sang phải (prev)
       setCurrentMovieIndex((prevIndex) => Math.max(0, prevIndex - 1));
     }
-    // Reset touch coordinates
     touchStartX.current = 0;
     touchEndX.current = 0;
   }, [allMovies.length]);
 
-  // Kiểm tra nếu không có phim để hiển thị
   if (!currentMovie) {
     return null;
   }
@@ -167,9 +155,7 @@ export default function MovieCard({ movies: initialMovies = [] }) {
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
-          {/* Chỉ render phim hiện tại (currentMovie) */}
           <div className="group movie-card-item movie-hero-width ">
-            {/* Removed the <a> tag around the image */}
             <div className="relative block aspect-[16/9] lg:aspect-[16/7] w-full overflow-hidden rounded-none lg:rounded-[4px]">
               <AnimatePresence initial={false}>
                 <motion.img

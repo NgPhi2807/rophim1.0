@@ -98,7 +98,7 @@ export default function MovieCard({ movies = [], title = "Phim" }) {
                 key={movieKey}
                 href={`/phim/${slug}`}
                 title={name}
-                className="group movie-card-item movie-card-width"
+                className="group movie-card-item movie-card-width2"
                 aria-label={`Xem phim ${name}`}
               >
                 <div
@@ -164,8 +164,8 @@ export default function MovieCard({ movies = [], title = "Phim" }) {
                   </div>
                 </div>
 
-                <div className="py-2 flex items-center gap-x-2.5">
-                  <span className="text-4xl font-black bg-clip-text text-transparent bg-[linear-gradient(39deg,rgba(254,207,89,1),rgba(255,241,204,1))] -mt-1 font-segoe italic">
+                <div className="py-2 flex items-center gap-x-3">
+                  <span className="text-4xl lg:text-5xl font-black bg-clip-text text-transparent bg-[linear-gradient(39deg,rgba(254,207,89,1),rgba(255,241,204,1))] -mt-1 font-segoe italic">
                     {index + 1}
                   </span>
 

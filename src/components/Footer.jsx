@@ -10,7 +10,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-[#0F111A] py-6 text-white px-4 lg:px-6 font-semibold ">
+    <footer className="bg-[#0F111A] py-6 text-white px-4 lg:px-6 font-medium ">
       <div className="container mx-auto">
         <div className="mb-4 flex flex-col items-start justify-between md:flex-row md:items-center">
           <div className="mb-4 flex flex-wrap items-center gap-4 md:mb-0 lg:gap-16">

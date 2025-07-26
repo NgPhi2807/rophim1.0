@@ -51,6 +51,9 @@
   .movie-card-width {
     @apply w-movie-col-3 sm:w-movie-col-4-sm md:w-movie-col-5-md lg:w-movie-col-5-md xl:w-movie-col-6-lg;
   }
+  .movie-card-width2 {
+    @apply w-movie-col-2 sm:w-movie-col-4-sm md:w-movie-col-5-md lg:w-movie-col-5-md xl:w-movie-col-6-lg;
+  }
   .movie-hero-width {
     @apply w-movie-col-1 ;
   }
@@ -100,4 +103,44 @@
 .custom-scrollbar {
   scrollbar-width: thin; /* Đặt chiều rộng thanh cuộn: "auto" hoặc "thin" */
   scrollbar-color: #4a4d55 #2a2c33; /* Màu thumb và màu track */
+}
+/* In your CSS file (e.g., index.css or a global stylesheet) */
+
+/* Search Results Dropdown Animation */
+.search-results-enter {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+.search-results-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 200ms ease-out, transform 200ms ease-out;
+}
+.search-results-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+.search-results-exit-active {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 200ms ease-out, transform 200ms ease-out;
+}
+
+/* Loading Spinner (example) */
+.spinner {
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid #fff;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

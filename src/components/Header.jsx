@@ -82,6 +82,18 @@ const MobileMenuIcon = ({ open }) => (
   </svg>
 );
 
+// New Loading Spinner Component
+const LoadingSpinner = () => (
+  <div className="flex justify-center py-4">
+    <div
+      className="h-6 w-6 animate-spin rounded-full border-2 border-solid border-white/30 border-t-white"
+      role="status"
+    >
+      <span className="sr-only">Đang tải...</span>
+    </div>
+  </div>
+);
+
 export default function Header() {
   const staticTheLoaiList = [
     { id: 1, ten: "Hành Động", slug: "hanh-dong" },
@@ -397,13 +409,7 @@ export default function Header() {
   }) => (
     <div className="p-2" role="listbox" aria-label="Kết quả tìm kiếm">
       {isSearching ? (
-        <div
-          className="p-4 text-center text-white/60 text-xs"
-          role="status"
-          aria-live="polite"
-        >
-          Đang tìm kiếm phim
-        </div>
+        <LoadingSpinner /> // Display loading spinner when searching
       ) : results.length > 0 ? (
         <>
           {results.slice(0, 5).map((movie) => (
@@ -562,7 +568,7 @@ export default function Header() {
                     }
                   }}
                   placeholder="Tìm kiếm phim..."
-                  className="h-8 w-full rounded-[4px] bg-white/10 px-4 pr-10 text-white placeholder-white/60 text-sm focus:outline-none"
+                  className="h-8 w-full rounded-[4px] bg-white/10 px-4 pr-10 text-white placeholder-white/60 text-xs focus:outline-none"
                   autoComplete="off"
                   aria-describedby={
                     showMobileSearchResults
@@ -570,8 +576,8 @@ export default function Header() {
                       : undefined
                   }
                   aria-expanded={showMobileSearchResults}
-                  aria-autocomplete="list"
                   role="combobox"
+                  aria-autocomplete="list"
                 />
                 {mobileSearchQuery.length > 0 ? (
                   <button
@@ -633,7 +639,7 @@ export default function Header() {
                 </button>
                 {showTheLoai && (
                   <div
-                    className="absolute left-0 top-full z-[51] mt-2 w-80 overflow-hidden rounded-lg bg-[#23252b] shadow-2xl backdrop-blur-xl"
+                    className="absolute left-0 top-full z-[51] mt-2 w-80 overflow-hidden rounded-lg bg-[#23252b] shadow-2xl backdrop-blur-xl animate-fade-in-down" // Added animation class
                     role="menu"
                     aria-labelledby="theloai-button"
                     id="theloai-dropdown"
@@ -676,7 +682,7 @@ export default function Header() {
                 </button>
                 {showQuocGia && (
                   <div
-                    className="absolute left-0 top-full z-[51] mt-2 w-96 overflow-hidden rounded-lg  bg-[#23252b] shadow-2xl backdrop-blur-xl"
+                    className="absolute left-0 top-full z-[51] mt-2 w-96 overflow-hidden rounded-lg  bg-[#23252b] shadow-2xl backdrop-blur-xl animate-fade-in-down" // Added animation class
                     role="menu"
                     aria-labelledby="quocgia-button"
                     id="quocgia-dropdown"
@@ -738,8 +744,8 @@ export default function Header() {
                     showDesktopSearchResults ? "search-results" : undefined
                   }
                   aria-expanded={showDesktopSearchResults}
-                  aria-autocomplete="list"
                   role="combobox"
+                  aria-autocomplete="list"
                 />
                 <button
                   type="submit"
@@ -751,7 +757,7 @@ export default function Header() {
               </form>
               {showDesktopSearchResults && desktopSearchQuery.length > 1 && (
                 <div
-                  className="absolute right-0 top-full z-50 mt-2 max-h-[60vh] w-full overflow-y-auto rounded-lg bg-[#1a1c22] shadow-2xl backdrop-blur-xl"
+                  className="absolute right-0 top-full z-50 mt-2 max-h-[60vh] w-full overflow-y-auto rounded-lg bg-[#1a1c22] shadow-2xl backdrop-blur-xl animate-fade-in-down" // Added animation class
                   id="search-results"
                 >
                   <SearchResultsDropdown
@@ -769,7 +775,7 @@ export default function Header() {
 
         {showMobileSearchResults && mobileSearchQuery.length > 1 && (
           <div
-            className="mobile-search-results-dropdown absolute left-0 right-0 top-16 z-[51] max-h-[80vh] overflow-y-auto rounded-md  bg-[#1f1f29] shadow-2xl backdrop-blur-xl lg:hidden"
+            className="mobile-search-results-dropdown absolute left-0 right-0 top-16 z-[51] max-h-[80vh] overflow-y-auto rounded-md  bg-[#1f1f29] shadow-2xl backdrop-blur-xl lg:hidden animate-fade-in-down" // Added animation class
             onClick={(e) => e.stopPropagation()}
             onTouchEnd={(e) => e.stopPropagation()}
             id="mobile-search-results"
@@ -787,7 +793,7 @@ export default function Header() {
         {mobileMenuOpen && (
           <div
             ref={mobileMenuPanelRef}
-            className="absolute left-4 right-4 top-16 w-[70%] z-[51] border-t border-white/10 bg-[#1f1f29] text-sm backdrop-blur-xl lg:hidden rounded-lg"
+            className="absolute left-4 right-4 top-16 w-[70%] z-[51] border-t border-white/10 bg-[#1f1f29] text-sm backdrop-blur-xl lg:hidden rounded-lg animate-fade-in-left" // Added animation class
             id="mobile-menu"
             role="navigation"
             aria-label="Menu di động"

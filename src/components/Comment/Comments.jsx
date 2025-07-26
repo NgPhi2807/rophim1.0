@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, push, onValue, update } from "firebase/database";
+import defaultAvatar from "../../assets/avatar.webp"; // Import your default avatar image here
 
 const firebaseConfig = {
   apiKey: "AIzaSyASSvFwOCSEPnVeX5wP7HkcCf0kK-9CGiw",
@@ -136,7 +137,7 @@ export default function CommentBox({ commentIdentifier }) {
   const handleSend = async () => {
     setErrorMessage("");
 
-    // NEW: Check cooldown before sending
+    // Check cooldown before sending
     if (cooldownRemaining > 0) {
       setErrorMessage(
         `Vui lòng đợi ${cooldownRemaining} giây trước khi bình luận lại.`
@@ -189,7 +190,7 @@ export default function CommentBox({ commentIdentifier }) {
       thoiGian: new Date().toISOString(),
       likes: 0,
       votes: {},
-      deviceId: deviceId, // NEW: Include deviceId in comment data for potential server-side checks
+      deviceId: deviceId, // Include deviceId in comment data for potential server-side checks
     };
 
     const commentRef = ref(database, `binhluan/${commentIdentifier}`);
@@ -203,7 +204,7 @@ export default function CommentBox({ commentIdentifier }) {
           localStorage.setItem("userName", ten);
           localStorage.setItem("userEmail", email);
         }
-        // NEW: Set last post time and start cooldown
+        // Set last post time and start cooldown
         localStorage.setItem("lastCommentPostTime", Date.now().toString());
         setCooldownRemaining(COMMENT_COOLDOWN_SECONDS);
       }
@@ -255,18 +256,6 @@ export default function CommentBox({ commentIdentifier }) {
     await update(commentRef, updates);
   };
 
-  const getInitials = (name) => {
-    if (!name) return "";
-    const words = name.split(" ").filter(Boolean);
-    if (words.length === 1) {
-      return words[0].substring(0, 2).toUpperCase();
-    }
-    return (
-      words[0].charAt(0).toUpperCase() +
-      words[words.length - 1].charAt(0).toUpperCase()
-    );
-  };
-
   const formatTimeAgo = (isoString) => {
     const commentDate = new Date(isoString);
     const now = new Date();
@@ -298,9 +287,20 @@ export default function CommentBox({ commentIdentifier }) {
   const CommentItem = ({ comment }) => (
     <div className="border-b border-gray-700 last:border-b-0">
       <div className="flex items-start space-x-4 py-4">
-        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br border border-gray-200 from-[#292929] to-[#2b2a2a] flex items-center justify-center text-white font-semibold text-sm shadow-lg">
-          {getInitials(comment.ten)}
-        </div>
+        <img
+          src={
+            typeof defaultAvatar === "string"
+              ? defaultAvatar
+              : defaultAvatar.src
+          } // Thay đổi ở đây
+          alt="Avatar người dùng"
+          className="flex-shrink-0 w-10 h-10 rounded-full object-cover border border-gray-200"
+          onError={(e) => {
+            // Optional: Fallback to a different image or hide if default fails
+            e.target.onerror = null; // Prevent infinite loop
+            e.target.src = "/placeholder-avatar.png"; // Provide another fallback if desired
+          }}
+        />
         <div className="flex-grow">
           <div className="flex items-center text-sm mb-2">
             <span className="font-semibold text-white mr-2">{comment.ten}</span>
@@ -346,7 +346,7 @@ export default function CommentBox({ commentIdentifier }) {
     isSending ||
     noiDung.trim().length === 0 ||
     (showUserDetails && ten.trim().length === 0) ||
-    cooldownRemaining > 0; // NEW: Disable if cooldown is active
+    cooldownRemaining > 0; // Disable if cooldown is active
 
   return (
     <div className="py-6 text-white font-sans">
