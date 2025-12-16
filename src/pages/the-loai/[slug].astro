@@ -75,7 +75,7 @@ const siteUrl = "https://phimmoii.top";
 const currentUrl = `${siteUrl}/the-loai/${slug}`;
 const titleTag = `Phim ${currentCategoryName} Mới Nhất | Tuyển Tập Phim Hay 2025 | Phimmoi`;
 const seoDescription = `Xem phim ${capitalizedCategoryName} tại Phimmoi Vietsub HD miễn phí, chất lượng hình ảnh đỉnh cao. Cập nhật nhanh nhất những bộ phim hấp dẫn, đảm bảo trải nghiệm xem phim tuyệt vời!`;
-const ogImage = categoryData?.items?.[0]?.thumb_url || `${siteUrl}/logo.png`;
+const ogImage = categoryData?.items?.[0]?.thumb_url || `${siteUrl}/logo.svg`;
 
 // Consolidated Schema.org data
 const schemaData = {
@@ -150,8 +150,8 @@ const schemaData = {
       logo: {
         "@type": "ImageObject",
         "@id": `${siteUrl}#/schema/logo/image/`,
-        url: `${siteUrl}/logo.png`,
-        contentUrl: `${siteUrl}/logo.png`,
+        url: `${siteUrl}/logo.svg`,
+        contentUrl: `${siteUrl}/logo.svg`,
         caption: "Phimmoi",
         inLanguage: "vi",
       },

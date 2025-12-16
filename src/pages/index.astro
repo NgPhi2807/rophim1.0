@@ -1,7 +1,5 @@
 ---
-// Server-side setup
 export const prerender = false;
-
 import Layout from "../layouts/Layout.astro";
 import HeroSection from "../components/HeroSection";
 import { getHomePageData } from "../utils/getMovieHome";
@@ -120,17 +118,17 @@ const seoJsonLD = {
     <link rel="canonical" href={siteUrl} />
     <meta name="theme-color" content="#1f1f29" />
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
-    <link rel="apple-touch-icon" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.svg" />
     <link rel="alternate" href={siteUrl} hreflang="vi" />
     <link rel="preconnect" href={siteUrl} crossorigin />
-    <link rel="preload" as="image" href="/logo.png" />
+    <link rel="preload" as="image" href="/logo.svg" />
 
     <meta property="og:type" content="website" />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={siteUrl} />
     <meta property="og:site_name" content="Phimmoi" />
-    <meta property="og:image" content={`${siteUrl}/logo.png`} />
+    <meta property="og:image" content={`${siteUrl}/logo.svg`} />
     <meta property="og:image:width" content="600" />
     <meta property="og:image:height" content="315" />
     <meta property="og:locale" content="vi_VN" />
@@ -138,7 +136,7 @@ const seoJsonLD = {
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={`${siteUrl}/logo.png`} />
+    <meta name="twitter:image" content={`${siteUrl}/logo.svg`} />
     <meta
       name="twitter:image:alt"
       content="Phimmoi - Xem Phim Vietsub HD Không Quảng Cáo"
@@ -174,20 +172,16 @@ const seoJsonLD = {
       src="/logo.svg"
       alt="PhimMoi Logo"
       class="w-auto h-14 lg:h-24 object-cover"
+      fetchpriority="high"
     />
     <p
       class="text-gray-200 font-semibold text-xl lg:text-4xl text-center mt-4 font-segoe leading-tight"
     >
       Chào Mừng Đến Với PhimMoi
     </p>
-    <p
-      class="hidden sm:block text-gray-200 font-semibold text-4xl text-center mt-4 font-segoe leading-tight"
-    >
-      Xem Phim Miễn Phí Không Quảng Cáo
-    </p>
   </div>
   <div class="bg-[#191B24]">
-    <Header client:visible />
+    <Header client:load />
     <main id="main-content" class="px-4 lg:px-8 lg:flex gap-2 lg:gap-10">
       <div class="w-full lg:flex-[7] flex flex-col min-w-0 gap-0 lg:gap-4">
         <div class="-mx-4 lg:-mx-8 mb-6">

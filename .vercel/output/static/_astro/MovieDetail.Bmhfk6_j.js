@@ -1,1 +1,0 @@
-import{j as e}from"./jsx-runtime.D_zvdyIk.js";function l({movie:l,children:s}){return e.jsx("div",{className:" text-gray-300 ",children:e.jsx("div",{className:"px-4",children:e.jsx("div",{className:"container mx-auto",children:e.jsx("div",{className:"flex flex-col gap-3 lg:flex-row",children:s})})})})}export{l as default};

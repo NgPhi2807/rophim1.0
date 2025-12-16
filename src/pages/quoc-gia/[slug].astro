@@ -124,7 +124,7 @@ const siteUrl = "https://phimmoii.top";
 const currentUrl = `${siteUrl}/quoc-gia/${slug}`;
 const titleTag = `${currentCategoryName} Mới Nhất 2025 | Xem ${currentCategoryName} Online Vietsub Tại Phimmoi`;
 const seoDescription = `Xem ${currentCategoryName.toLowerCase()} online chất lượng cao, Vietsub miễn phí tại Phimmoi. Nội dung hấp dẫn, cập nhật liên tục không quảng cáo.`;
-const ogImage = categoryData?.items?.[0]?.thumb_url || `${siteUrl}/logo.png`;
+const ogImage = categoryData?.items?.[0]?.thumb_url || `${siteUrl}/logo.svg`;
 
 // Consolidated Schema.org data
 const schemaData = {
@@ -199,8 +199,8 @@ const schemaData = {
       logo: {
         "@type": "ImageObject",
         "@id": `${siteUrl}#/schema/logo/image/`,
-        url: `${siteUrl}/logo.png`,
-        contentUrl: `${siteUrl}/logo.png`,
+        url: `${siteUrl}/logo.svg`,
+        contentUrl: `${siteUrl}/logo.svg`,
         caption: "Phimmoi",
         inLanguage: "vi",
       },

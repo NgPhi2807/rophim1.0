@@ -57,11 +57,9 @@ if (!primaryMovieInfo || Object.keys(primaryMovieInfo).length === 0) {
   return Astro.redirect("/404");
 }
 
-// --- STEP 2: Try to get the video link from the selected server, then fallbacks ---
 try {
-  let fetchedEpisodeLinkData = null; // This will hold link_video and actual_ngon_ngu_type
+  let fetchedEpisodeLinkData = null;
 
-  // Try the requested server first
   if (server === "sv1") {
     fetchedEpisodeLinkData = await fetchPhimApiEpisode(slug, so_tap, ngon_ngu);
   } else if (server === "sv2") {
@@ -78,19 +76,16 @@ try {
     );
   }
 
-  // If a link is found from the requested server, use it
   if (fetchedEpisodeLinkData?.link_video) {
     originalVideoUrl = fetchedEpisodeLinkData.link_video;
     finalServer = server;
     finalNgonNgu = fetchedEpisodeLinkData.actual_ngon_ngu_type || ngon_ngu;
   } else {
-    // If the requested server/language combination failed, try fallbacks
     const allServers = ["sv1", "sv2", "sv3"];
     const allLanguages = ["vietsub", "thuyetminh", "longtieng"];
 
     let fallbackFound = false;
 
-    // Fallback 1: Try other servers with the *requested language*
     for (const fbServer of allServers.filter((s) => s !== server)) {
       let fallbackData = null;
       if (fbServer === "sv1") {
@@ -110,7 +105,6 @@ try {
       }
     }
 
-    // Fallback 2: If still no video, try all servers with *other languages*
     if (!fallbackFound) {
       for (const fbServer of allServers) {
         for (const fbLang of allLanguages.filter((l) => l !== ngon_ngu)) {
@@ -149,7 +143,6 @@ try {
         result = await fetchNguoncEpisodeEmbed(slug, so_tap, checkLang);
       }
       // Ensure we check actual_ngon_ngu_type for exact match, as API might return a link
-      // but categorize it under a different "actual" language (e.g., "thuyetminh" for "longtieng")
       return (
         result?.link_video &&
         (result?.actual_ngon_ngu_type === checkLang ||
@@ -174,7 +167,6 @@ try {
     checkServerHasSpecificLangVideo("sv3", ngon_ngu),
   ]);
 
-  // If after all attempts, no video URL is found, redirect to 404
   if (!originalVideoUrl) {
     return Astro.redirect("/404");
   }
@@ -183,7 +175,6 @@ try {
   return Astro.redirect("/404");
 }
 
-// Now, primaryMovieInfo is guaranteed to have data if we reached here
 const tenPhim = primaryMovieInfo.name;
 const tenKhac = primaryMovieInfo.origin_name;
 const rawThumbnail = primaryMovieInfo.thumb_url;
@@ -213,7 +204,7 @@ function chuyenURLSangProxy1(url: string) {
 
 const thumbnail = chuyenURLSangProxy(rawThumbnail);
 const currentEpisodeSlugParam = tap_slug;
-const currentType = finalNgonNgu; // Use finalNgonNgu here for consistency
+const currentType = finalNgonNgu;
 
 const {
   tenPhimFormatted,
@@ -224,7 +215,7 @@ const {
 } = generateSeoData(
   tenPhim,
   so_tap,
-  currentType, // Pass currentType (actual language found)
+  currentType,
   currentUrl,
   thumbnail,
   slug,
@@ -286,7 +277,6 @@ const {
               <VideoPlayer
                 client:only
                 originalUrl={originalVideoUrl}
-                skipAdApiUrl={SKIP_AD_API_URL}
                 slug={slug}
                 ngonngu={finalNgonNgu}
                 sotap={so_tap}

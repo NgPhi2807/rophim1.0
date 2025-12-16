@@ -99,7 +99,6 @@ export default function MovieCard2({ movies = [], title = "Phim Lẻ Mới" }) {
               slug,
               name,
               thumb_url,
-              year,
               episode_current,
               lang,
               origin_name,
@@ -169,7 +168,7 @@ export default function MovieCard2({ movies = [], title = "Phim Lẻ Mới" }) {
 
         <button
           onClick={() => scroll("left")}
-          className={`absolute left-0 z-30 top-12 hidden sm:flex md:top-16 lg:top-20 xl:top-12 h-8 w-8 items-center justify-center transition-opacity duration-300 py-0.5 hover:scale-110 cursor-pointer ${
+          className={`absolute left-0 z-30 top-[35%] hidden sm:flex h-8 w-8 items-center justify-center transition-opacity duration-300 py-0.5 hover:scale-110 cursor-pointer ${
             canScrollLeft ? "opacity-100" : "opacity-0 pointer-events-none"
           } sm:block hidden`}
           aria-label={`Cuộn trái phần ${title}`}
@@ -190,7 +189,7 @@ export default function MovieCard2({ movies = [], title = "Phim Lẻ Mới" }) {
         </button>
         <button
           onClick={() => scroll("right")}
-          className={`absolute right-0 z-30 hidden sm:flex md:top-16 lg:top-20 xl:top-12  h-8 w-8 items-center justify-center transition-opacity duration-300 py-0.5 hover:scale-110 cursor-pointer ${
+          className={`absolute right-0 z-30 hidden sm:flex top-[30%] h-8 w-8 items-center justify-center transition-opacity duration-300 py-0.5 hover:scale-110 cursor-pointer ${
             canScrollRight ? "opacity-100" : "opacity-0 pointer-events-none"
           } sm:block hidden`}
           aria-label={`Cuộn phải phần ${title}`}

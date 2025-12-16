@@ -1,4 +1,3 @@
-// src/utils/getMoviePlayer.js (or .ts)
 
 import axios from "axios";
 
@@ -84,8 +83,6 @@ export const fetchJson = async (url, instance = axiosInstance) => {
   }
 };
 
-// ** Modified fetchPhimApiEpisode to NOT return movie_data.
-// It will only return the link_video and actual_ngon_ngu_type**
 export const fetchPhimApiEpisode = async (slug, so_tap, ngon_ngu) => {
   try {
     const movieDetail = await fetchJson(`/phim/${slug}`, phimApiAxiosInstance);
@@ -161,8 +158,6 @@ export const fetchPhimApiEpisode = async (slug, so_tap, ngon_ngu) => {
   }
 };
 
-// ** Modified fetchOphim1EpisodeEmbed to NOT return movie_data.
-// It will only return the link_video and actual_ngon_ngu_type**
 export const fetchOphim1EpisodeEmbed = async (slug, so_tap, ngon_ngu) => {
   try {
     const movieDetail = await fetchJson(`/phim/${slug}`, ophim1AxiosInstance);
@@ -234,8 +229,7 @@ export const fetchOphim1EpisodeEmbed = async (slug, so_tap, ngon_ngu) => {
   }
 };
 
-// ** Modified fetchNguoncEpisodeEmbed to NOT return movie_data.
-// It will only return the link_video and actual_ngon_ngu_type**
+
 export const fetchNguoncEpisodeEmbed = async (movieSlug, episodeNum, lang) => {
   const NGUONC_API_BASE = "https://phim.nguonc.com/api/film";
   const movieDetailUrl = `${NGUONC_API_BASE}/${movieSlug}`;
@@ -316,12 +310,11 @@ export const fetchNguoncEpisodeEmbed = async (movieSlug, episodeNum, lang) => {
   }
 };
 
-// ** fetchAllMovieData remains largely the same, but it's now the primary source for movie info. **
 export const fetchAllMovieData = async (slug) => {
   try {
     const [phimApiResult, homeDataResult] = await Promise.allSettled([
       fetchJson(`/phim/${slug}`, phimApiAxiosInstance),
-      fetchHomeData(), // assuming fetchHomeData is independent of movie slug
+      fetchHomeData(),
     ]);
 
     let movieDetailFromPhimApi = {};
@@ -372,9 +365,8 @@ export const fetchAllMovieData = async (slug) => {
       topData = homeDataResult.value.topData || [];
     }
 
-    // Return the consolidated movie data from PhimAPI and episode lists
     return {
-      movieData: movieDetailFromPhimApi, // This is the single source of movie metadata
+      movieData: movieDetailFromPhimApi,
       vietsubEpisodes,
       thuyetminhEpisodes,
       longtiengEpisodes,
@@ -384,7 +376,7 @@ export const fetchAllMovieData = async (slug) => {
   } catch (error) {
     console.error(`Error fetching all movie data for ${slug}:`, error);
     return {
-      movieData: {}, // Ensure this is always returned even on error
+      movieData: {},
       vietsubEpisodes: [],
       thuyetminhEpisodes: [],
       longtiengEpisodes: [],
@@ -423,11 +415,11 @@ export const fetchHomeData = async () => {
 export const capitalizeWords = (str) =>
   str
     ? str
-        .split(" ")
-        .map(
-          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-        )
-        .join(" ")
+      .split(" ")
+      .map(
+        (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+      )
+      .join(" ")
     : "";
 
 const CANONICAL_APP_BASE_URL = "https://phimmoii.top";
@@ -448,10 +440,10 @@ export const generateSeoData = (
     ngon_ngu === "vietsub"
       ? "Vietsub"
       : ngon_ngu === "thuyetminh"
-      ? "Thuyết Minh"
-      : ngon_ngu === "longtieng"
-      ? "Lồng Tiếng"
-      : capitalizeWords(ngon_ngu || "");
+        ? "Thuyết Minh"
+        : ngon_ngu === "longtieng"
+          ? "Lồng Tiếng"
+          : capitalizeWords(ngon_ngu || "");
 
   const tenKhacFormatted = capitalizeWords(tenKhac || "");
   const tenKhacPart =

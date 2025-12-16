@@ -1,0 +1,109 @@
+---
+const siteUrl = "https://motchillhd.online";
+const pageTitle =
+  "Motchill | Phim Mới | Phim Hay | Phim HD Vietsub | Xem Phim Online Nhanh";
+const description =
+  "Motchill - Trang xem phim online miễn phí, cập nhật nhanh các thể loại phim hot, phim chiếu rạp, phim bộ Trung, Hàn. Phim Vietsub, Thuyết Minh chất lượng cao Full HD không quảng cáo!";
+
+const seoJsonLD = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "CollectionPage",
+      "@id": `${siteUrl}/`,
+      url: `${siteUrl}/`,
+      name: pageTitle,
+      isPartOf: { "@id": `${siteUrl}/#website` },
+      about: { "@id": `${siteUrl}/#organization` },
+      description,
+      breadcrumb: { "@id": `${siteUrl}/#breadcrumb` },
+      inLanguage: "vi",
+      dateModified: "2025-07-16",
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": `${siteUrl}/#breadcrumb`,
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Trang chủ",
+          item: `${siteUrl}/`,
+        },
+      ],
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${siteUrl}/#website`,
+      url: `${siteUrl}/`,
+      name: "Phimmoi",
+      description: "Xem phim Vietsub HD tại Phimmoi",
+      publisher: { "@id": `${siteUrl}/#organization` },
+      inLanguage: "vi",
+      potentialAction: {
+        "@type": "SearchAction",
+        target: {
+          "@type": "EntryPoint",
+          urlTemplate: `${siteUrl}/?s={search_term_string}`,
+        },
+        "query-input": {
+          "@type": "PropertyValueSpecification",
+          name: "search_term_string",
+          valueRequired: true,
+        },
+      },
+    },
+    {
+      "@type": "Organization",
+      "@id": `${siteUrl}/#organization`,
+      name: "Phimmoi",
+      url: `${siteUrl}/`,
+      logo: {
+        "@type": "ImageObject",
+        "@id": `${siteUrl}/#logo`,
+        inLanguage: "vi",
+        url: `${siteUrl}/logo.png`,
+        contentUrl: `${siteUrl}/logo.png`,
+        caption: "Phimmoi",
+      },
+      image: { "@id": `${siteUrl}/#logo` },
+    },
+  ],
+};
+---
+
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{pageTitle}</title>
+<meta name="description" content={description} />
+<meta name="robots" content="index, follow" />
+<meta name="author" content="Phimmoi" />
+<meta name="copyright" content="© 2025 Phimmoi" />
+<link rel="canonical" href={siteUrl} />
+<meta name="theme-color" content="#1f1f29" />
+<link rel="icon" href="/favicon.ico" type="image/x-icon" />
+<link rel="apple-touch-icon" href="/logo.png" />
+<link rel="alternate" href={siteUrl} hreflang="vi" />
+<link rel="preconnect" href={siteUrl} crossorigin />
+<link rel="preload" as="image" href="/logo.png" />
+
+<meta property="og:type" content="website" />
+<meta property="og:title" content={pageTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={siteUrl} />
+<meta property="og:site_name" content="Phimmoi" />
+<meta property="og:image" content={`${siteUrl}/logo.png`} />
+<meta property="og:image:width" content="600" />
+<meta property="og:image:height" content="315" />
+<meta property="og:locale" content="vi_VN" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={pageTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={`${siteUrl}/logo.png`} />
+<meta
+  name="twitter:image:alt"
+  content="Phimmoi - Xem Phim Vietsub HD Không Quảng Cáo"
+/>
+
+<script type="application/ld+json" set:html={JSON.stringify(seoJsonLD)} />
